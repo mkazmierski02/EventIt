@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="event_types">
+        <item>Sport</item>
+        <item>Koncerty</item>
+        <item>Sztuka</item>
+        <item>Imprezy</item>
+        <item>Festiwale</item>
+        <item>Inne</item>
+    </string-array>
+</resources>

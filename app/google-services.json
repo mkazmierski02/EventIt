@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "286559436602",
+    "project_id": "eventit-abc20",
+    "storage_bucket": "eventit-abc20.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:286559436602:android:fce5a2c4fd33aac85c1a03",
+        "android_client_info": {
+          "package_name": "com.example.eventit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "286559436602-l30mgd37j16u5egvpjacr16as7r1icuk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCh90tGGjo_-6UCZB8eUO2I_4vPkLPD5yc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "286559436602-l30mgd37j16u5egvpjacr16as7r1icuk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

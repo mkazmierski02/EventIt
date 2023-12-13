@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="event_types">
+    <string-array name="category_options">
         <item>Sport</item>
         <item>Muzyka</item>
         <item>Sztuka</item>

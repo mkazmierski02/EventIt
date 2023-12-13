@@ -53,7 +53,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp"
-        android:inputType="textEmailAddress" />
+        android:inputType="textEmailAddress"
+        android:autofillHints="" />
 
     <EditText
         android:id="@+id/passwordEditText"
@@ -64,7 +65,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp"
-        android:inputType="textPassword" />
+        android:inputType="textPassword"
+        android:autofillHints="" />
 
     <Button
         android:id="@+id/loginButton"
@@ -76,7 +78,7 @@
         app:layout_constraintHorizontal_bias="0.476"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.452" />
+        app:layout_constraintVertical_bias="0.458" />
 
     <Button
         android:id="@+id/registerButton"
@@ -88,7 +90,7 @@
         app:layout_constraintHorizontal_bias="0.476"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.535" />
+        app:layout_constraintVertical_bias="0.542" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

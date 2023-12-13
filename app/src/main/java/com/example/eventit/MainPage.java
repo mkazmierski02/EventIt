@@ -15,65 +15,99 @@ import android.widget.Spinner;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class MainPage extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-    private List<String> allEvents; // Store all events to reset the list when search is cleared
-    private List<String> displayedEvents; // Store currently displayed events
+    private List<String> allEvents;
+    private List<String> displayedEvents;
+    private ArrayAdapter<String> adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_page);
 
-        // Inicjalizacja Firestore
-        db = FirebaseFirestore.getInstance();
-
-        // Inicjalizacja FirebaseAuth
-        mAuth = FirebaseAuth.getInstance();
-
-        // Inicjalizacja ListView
-        ListView eventListView = findViewById(R.id.event_list_view);
-
-        // Inicjalizacja przycisku wylogowania
-        Button logoutButton = findViewById(R.id.logout_button);
-
-        // Inicjalizacja EditText
-        EditText searchEditText = findViewById(R.id.search_edit_text);
-
-        // Inicjalizacja Spinner
-        Spinner sortSpinner = findViewById(R.id.sort_spinner);
-
-        // Pobranie i wyświetlenie wydarzeń z Firestore
+        initFirebase();
+        initViews();
         readEventsFromFirestore();
+        setupLogoutButton();
+        setupSearchEditText();
+        setupSortSpinner();
+        setupCategorySpinner();
+    }
 
-        // Dodanie obsługi kliknięcia przycisku wylogowania
-        logoutButton.setOnClickListener(view -> {
-            // Wylogowanie użytkownika z Firebase
-            mAuth.signOut();
+    private void initFirebase() {
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+    }
 
-            // Przekierowanie do MainActivity
-            Intent intent = new Intent(MainPage.this, MainActivity.class);
-            startActivity(intent);
-            finish(); // Opcjonalne: Zamknij aktualną aktywność, aby użytkownik nie mógł wrócić przyciskiem "Wstecz"
-        });
-
-        // Save all events initially
+    private void initViews() {
+        ListView eventListView = findViewById(R.id.event_list_view);
+        Button logoutButton = findViewById(R.id.logout_button);
         allEvents = new ArrayList<>();
         displayedEvents = new ArrayList<>();
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, displayedEvents);
+        eventListView.setAdapter(adapter);
+    }
 
-        // Add TextWatcher to the search EditText
+    private void readEventsFromFirestore() {
+        CollectionReference eventsRef = db.collection("events");
+
+        eventsRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                allEvents.clear();
+
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    String eventName = document.getString("nazwa");
+                    //String eventDescription = document.getString("opis");
+                    String eventCategory = document.getString("kategoria");
+                    Timestamp timestamp = document.getTimestamp("data");
+                    Date date = (timestamp != null) ? timestamp.toDate() : null;
+                    String eventDate = (date != null) ? formatDate(date) : "";
+                    Double eventPrice = document.getDouble("cena");
+                    String priceString = (eventPrice != null) ? String.valueOf(eventPrice) : "";
+
+                    String eventString = "Nazwa: " + eventName + "\nCena: " + priceString + "\nData: " + eventDate + "\nKategoria: " + eventCategory;
+                    allEvents.add(eventString);
+                }
+
+                filterEvents("");
+            } else {
+            }
+        });
+    }
+
+    private String formatDate(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+        return sdf.format(date);
+    }
+
+    private void setupLogoutButton() {
+        Button logoutButton = findViewById(R.id.logout_button);
+        logoutButton.setOnClickListener(view -> {
+            mAuth.signOut();
+            Intent intent = new Intent(MainPage.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        });
+    }
+
+    private void setupSearchEditText() {
+        EditText searchEditText = findViewById(R.id.search_edit_text);
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -85,27 +119,22 @@ public class MainPage extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                // Filter events based on the search input
                 filterEvents(editable.toString());
             }
         });
+    }
 
-        // Lista opcji sortowania
-        String[] sortOptions = {"Sortuj po dacie", "Sortuj po cenie (od najtańszych)", "Sortuj po cenie (od najdroższych)"};
-
-        // Adapter dla Spinner
+    private void setupSortSpinner() {
+        Spinner sortSpinner = findViewById(R.id.sort_spinner);
+        String[] sortOptions = {"Sortowanie: Brak", "Sortowanie chronologicznie", "Sortowanie od najtańszych", "Sortowanie od najdroższych"};
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, sortOptions);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sortSpinner.setAdapter(spinnerAdapter);
 
-        // Dodanie obsługi wyboru sortowania
         sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                // Obsługa wyboru sortowania
                 String selectedSortOption = sortOptions[position];
-
-                // Wywołaj funkcję sortowania w zależności od wybranej opcji
 
                 if (selectedSortOption.equals("Sortowanie chronologicznie")) {
                     sortByDate();
@@ -118,76 +147,92 @@ public class MainPage extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-                // Nie wymagane, ale możesz dodać obsługę
             }
         });
     }
 
-    private void readEventsFromFirestore() {
-        // Pobranie referencji do kolekcji "events"
-        CollectionReference eventsRef = db.collection("events");
+    private void setupCategorySpinner() {
+        Spinner categorySpinner = findViewById(R.id.category_spinner);
+        String[] categoryOptions = {"Kategoria: Wszystkie", "Kategoria: Sport", "Kategoria: Muzyka", "Kategoria: Sztuka", "Kategoria: Impreza", "Kategoria: Jedzenie", "Kategoria: Inne"};
+        ArrayAdapter<String> categorySpinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categoryOptions);
+        categorySpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        categorySpinner.setAdapter(categorySpinnerAdapter);
 
-        // Pobranie wszystkich danych z Firestore (bez filtrowania)
-        eventsRef.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                // Odczytanie dokumentów z zapytania
-                allEvents.clear(); // Clear the existing events
+        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                String selectedCategory = categoryOptions[position];
+                filterEventsByCategory(selectedCategory);
+            }
 
-                for (QueryDocumentSnapshot document : task.getResult()) {
-                    // Odczytanie danych z dokumentu
-                    String eventName = document.getString("nazwa");
-                    String eventDescription = document.getString("opis");
-
-                    // Dodanie danych do listy
-                    String eventString = "Nazwa: " + eventName + "\nOpis: " + eventDescription + "\n";
-                    allEvents.add(eventString);
-                }
-
-                // Update the displayed events
-                filterEvents(""); // Display all events initially
-            } else {
-                // Obsługa błędów zapytania
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
     }
 
     private void filterEvents(String searchText) {
-        // Filter events based on the search input
         displayedEvents.clear();
 
         for (String event : allEvents) {
-            // Sprawdź czy nazwa wydarzenia zawiera searchText
-            String eventName = event.split("\n")[0]; // Zakładam, że nazwa jest pierwszym atrybutem
-            if (eventName.toLowerCase().contains(searchText.toLowerCase())) {
+            if (event.toLowerCase().contains(searchText.toLowerCase())) {
                 displayedEvents.add(event);
             }
         }
 
-        // Update the displayed events
-        displayEventData(displayedEvents);
+        adapter.notifyDataSetChanged();
     }
 
-    // Implementuj poniższe funkcje sortujące zgodnie z własnymi potrzebami
+    private void filterEventsByCategory(String selectedCategory) {
+        displayedEvents.clear();
+
+        for (String event : allEvents) {
+            if (selectedCategory.equals("Wszystkie") || event.toLowerCase().contains(selectedCategory.toLowerCase())) {
+                displayedEvents.add(event);
+            }
+        }
+
+        adapter.notifyDataSetChanged();
+    }
 
     private void sortByDate() {
-        // Implementuj sortowanie po dacie
+        Collections.sort(displayedEvents, (event1, event2) -> {
+            String date1 = event1.split("\n")[2].replace("Data: ", "").trim();
+            String date2 = event2.split("\n")[2].replace("Data: ", "").trim();
+
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+
+            try {
+                Date dateTime1 = sdf.parse(date1);
+                Date dateTime2 = sdf.parse(date2);
+
+                return dateTime1.compareTo(dateTime2);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return 0;
+            }
+        });
+
+        adapter.notifyDataSetChanged();
     }
 
     private void sortByPriceAscending() {
-        // Implementuj sortowanie po cenie od najtańszych
+        Collections.sort(displayedEvents, (event1, event2) -> {
+            double price1 = Double.parseDouble(event1.split("\n")[1].replace("Cena:", "").trim());
+            double price2 = Double.parseDouble(event2.split("\n")[1].replace("Cena:", "").trim());
+            return Double.compare(price1, price2);
+        });
+
+        adapter.notifyDataSetChanged();
     }
 
     private void sortByPriceDescending() {
-        // Implementuj sortowanie po cenie od najdroższych
-    }
+        Collections.sort(displayedEvents, (event1, event2) -> {
+            double price1 = Double.parseDouble(event1.split("\n")[1].replace("Cena:", "").trim());
+            double price2 = Double.parseDouble(event2.split("\n")[1].replace("Cena:", "").trim());
+            return Double.compare(price2, price1);
+        });
 
-    private void displayEventData(List<String> eventList) {
-        // Inicjalizacja ListView
-        ListView eventListView = findViewById(R.id.event_list_view);
-
-        // Ustawienie danych dla ListView
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_list_item_1, eventList);
-        eventListView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
     }
 }

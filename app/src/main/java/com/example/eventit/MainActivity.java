@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
         Button loginButton = findViewById(R.id.loginButton);
         Button registerButton = findViewById(R.id.registerButton);
 
-        // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -98,20 +97,13 @@ public class MainActivity extends AppCompatActivity {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // Pomyślnie zalogowano do Firebase za pomocą konta Google
                         FirebaseUser user = mAuth.getCurrentUser();
-
-                        // Tutaj możesz dodać nowe konto w Firebase Authentication
                         assert user != null;
                         String email = user.getEmail();
                         String uid = user.getUid();
-
-                        // Przykład dodawania nowego konta w Firebase (tutaj używając Firebase Realtime Database)
                         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("users");
                         User newUser = new User(uid, email);
                         databaseReference.child(uid).setValue(newUser);
-
-                        // Po zalogowaniu, otwórz nową aktywność (MainPageActivity)
                         openMainPage();
                     } else {
                         // Błąd logowania
@@ -119,12 +111,10 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
-    // Funkcja otwierająca nową aktywność (MainPage)
     private void openMainPage() {
         Intent intent = new Intent(MainActivity.this, MainPage.class);
         startActivity(intent);
-        finish(); // Opcjonalne: Zamknij aktualną aktywność, aby użytkownik nie mógł wrócić przyciskiem "Wstecz"
+        finish();
     }
 
     private void loginUserWithEmailAndPassword() {
@@ -135,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
-                        // Tutaj możesz przekierować użytkownika na ekran główny lub inny
                         openMainPage();
                     } else {
                         Log.e("TAG", "Błąd logowania: " + Objects.requireNonNull(task.getException()).getMessage());
@@ -152,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
-                        // Tutaj możesz przekierować użytkownika na ekran główny lub inny
                     } else {
                         Log.e("TAG", "Błąd rejestracji: " + Objects.requireNonNull(task.getException()).getMessage());
                         Toast.makeText(MainActivity.this, "Błąd rejestracji", Toast.LENGTH_SHORT).show();

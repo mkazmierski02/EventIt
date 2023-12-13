@@ -26,6 +26,11 @@
             android:name=".MainPage"
             android:exported="true">
         </activity>
+        <activity
+            android:name=".EventsPage"
+            android:exported="true">
+        </activity>
+
 
     </application>
 </manifest>

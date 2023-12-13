@@ -3,40 +3,35 @@ package com.example.eventit;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.android.gms.common.api.ApiException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
 import java.util.Objects;
 
+
+
+
 public class MainActivity extends AppCompatActivity {
+
     private FirebaseAuth mAuth;
     private static final int RC_SIGN_IN = 123;
+    private GoogleSignInClient googleSignInClient;
 
-    private GoogleApiClient mGoogleApiClient;
-    private Button googleLoginButton;
     private EditText emailEditText;
     private EditText passwordEditText;
-    private Button loginButton;
-    private Button registerButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,46 +40,37 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        googleLoginButton = findViewById(R.id.google_login_button);
+        Button googleLoginButton = findViewById(R.id.google_login_button);
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
-        loginButton = findViewById(R.id.loginButton);
-        registerButton = findViewById(R.id.registerButton);
+        Button loginButton = findViewById(R.id.loginButton);
+        Button registerButton = findViewById(R.id.registerButton);
 
-        googleLoginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                signInWithGoogle();
-            }
-        });
+        // Configure Google Sign In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        googleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        googleLoginButton.setOnClickListener(view -> signInWithGoogle());
+
+        loginButton.setOnClickListener(view -> {
+            if (validateForm()) {
                 loginUserWithEmailAndPassword();
             }
         });
 
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        registerButton.setOnClickListener(view -> {
+            if (validateForm()) {
                 registerUserWithEmailAndPassword();
             }
         });
     }
 
     private void signInWithGoogle() {
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-        mGoogleApiClient.connect();
-
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        Intent signInIntent = googleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
@@ -110,28 +96,26 @@ public class MainActivity extends AppCompatActivity {
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Pomyślnie zalogowano do Firebase za pomocą konta Google
-                            FirebaseUser user = mAuth.getCurrentUser();
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        // Pomyślnie zalogowano do Firebase za pomocą konta Google
+                        FirebaseUser user = mAuth.getCurrentUser();
 
-                            // Tutaj możesz dodać nowe konto w Firebase Authentication
-                            String email = user.getEmail();
-                            String uid = user.getUid();
+                        // Tutaj możesz dodać nowe konto w Firebase Authentication
+                        assert user != null;
+                        String email = user.getEmail();
+                        String uid = user.getUid();
 
-                            // Przykład dodawania nowego konta w Firebase (tutaj używając Firebase Realtime Database)
-                            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("users");
-                            User newUser = new User(uid, email);
-                            databaseReference.child(uid).setValue(newUser);
+                        // Przykład dodawania nowego konta w Firebase (tutaj używając Firebase Realtime Database)
+                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("users");
+                        User newUser = new User(uid, email);
+                        databaseReference.child(uid).setValue(newUser);
 
-                            // Po zalogowaniu, otwórz nową aktywność (MainPageActivity)
-                            openMainPage();
-                        } else {
-                            // Błąd logowania
-                            Toast.makeText(MainActivity.this, "Błąd logowania", Toast.LENGTH_SHORT).show();
-                        }
+                        // Po zalogowaniu, otwórz nową aktywność (MainPageActivity)
+                        openMainPage();
+                    } else {
+                        // Błąd logowania
+                        Toast.makeText(MainActivity.this, "Błąd logowania", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -148,38 +132,48 @@ public class MainActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString();
 
         mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            // Tutaj możesz przekierować użytkownika na ekran główny lub inny
-                            openMainPage();
-                        } else {
-                            Log.e("TAG", "Błąd logowania: " + Objects.requireNonNull(task.getException()).getMessage());
-                            Toast.makeText(MainActivity.this, "Błąd logowania", Toast.LENGTH_SHORT).show();
-                        }
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        // Tutaj możesz przekierować użytkownika na ekran główny lub inny
+                        openMainPage();
+                    } else {
+                        Log.e("TAG", "Błąd logowania: " + Objects.requireNonNull(task.getException()).getMessage());
+                        Toast.makeText(MainActivity.this, "Błąd logowania", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
-
 
     private void registerUserWithEmailAndPassword() {
         String email = emailEditText.getText().toString();
         String password = passwordEditText.getText().toString();
 
         mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            // Tutaj możesz przekierować użytkownika na ekran główny lub inny
-                        } else {
-                            Log.e("TAG", "Błąd rejestracji: " + task.getException().getMessage());
-                            Toast.makeText(MainActivity.this, "Błąd rejestracji", Toast.LENGTH_SHORT).show();
-                        }
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        // Tutaj możesz przekierować użytkownika na ekran główny lub inny
+                    } else {
+                        Log.e("TAG", "Błąd rejestracji: " + Objects.requireNonNull(task.getException()).getMessage());
+                        Toast.makeText(MainActivity.this, "Błąd rejestracji", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private boolean validateForm() {
+        String email = emailEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString().trim();
+
+        if (email.isEmpty()) {
+            Toast.makeText(MainActivity.this, "Wprowadź adres e-mail", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (password.isEmpty()) {
+            Toast.makeText(MainActivity.this, "Wprowadź hasło", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
     }
 }

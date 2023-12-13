@@ -2,10 +2,10 @@
 <resources>
     <string-array name="event_types">
         <item>Sport</item>
-        <item>Koncerty</item>
+        <item>Muzyka</item>
         <item>Sztuka</item>
-        <item>Imprezy</item>
-        <item>Festiwale</item>
+        <item>Impreza</item>
+        <item>Jedzenie</item>
         <item>Inne</item>
     </string-array>
 </resources>

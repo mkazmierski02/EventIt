@@ -181,7 +181,9 @@ public class MainPage extends AppCompatActivity {
         displayedEvents.clear();
 
         for (String event : allEvents) {
-            if (event.toLowerCase().contains(searchText.toLowerCase())) {
+            String eventName = event.split("\n")[0].replace("Nazwa: ", "").trim();
+
+            if (eventName.toLowerCase().contains(searchText.toLowerCase())) {
                 displayedEvents.add(event);
             }
         }

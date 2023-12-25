@@ -184,6 +184,8 @@ public class MainPage extends AppCompatActivity {
                     String eventName = document.getString("nazwa");
                     String eventDescription = document.getString("opis");
                     String eventCategory = document.getString("kategoria");
+                    String city = document.getString("miasto");
+                    String street = document.getString("adres");
 
                     Timestamp timestamp = document.getTimestamp("data");
                     Date date = (timestamp != null) ? timestamp.toDate() : null;
@@ -195,7 +197,7 @@ public class MainPage extends AppCompatActivity {
 
                     String priceString = (eventPrice != null) ? String.valueOf(eventPrice) : "";
 
-                    String eventString = "Nazwa: " + eventName + "\nCena: " + priceString + "\nData: " + eventDate + "\nBilety: " + tickets + "/" + maxTickets + "\nKategoria: " + eventCategory ;
+                    String eventString = "Nazwa: " + eventName + "\nCena: " + priceString + "\nData: " + eventDate + "\nAdres: " + street + ", " + city + "\nKategoria: " + eventCategory ;
                     allEvents.add(eventString);
                 }
 

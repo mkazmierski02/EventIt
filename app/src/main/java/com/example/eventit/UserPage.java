@@ -1,6 +1,8 @@
 package com.example.eventit;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
@@ -9,9 +11,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class UserPage extends AppCompatActivity {
 
@@ -19,9 +21,8 @@ public class UserPage extends AppCompatActivity {
     private TextView userEmailTextView;
     private EditText editTextName;
     private EditText editTextSurname;
-    private EditText editTextAddress;
-    private EditText editTextPhoneNumber;
     private FirebaseFirestore db;
+    private Button saveButton;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -32,8 +33,7 @@ public class UserPage extends AppCompatActivity {
         userEmailTextView = findViewById(R.id.user_email_text_view);
         editTextName = findViewById(R.id.editTextName);
         editTextSurname = findViewById(R.id.editTextSurname);
-        editTextAddress = findViewById(R.id.editTextAddress);
-        editTextPhoneNumber = findViewById(R.id.editTextPhoneNumber);
+        saveButton = findViewById(R.id.saveButton);
 
         // Initialize Firestore
         db = FirebaseFirestore.getInstance();
@@ -49,25 +49,50 @@ public class UserPage extends AppCompatActivity {
             // Display the email in the TextView
             userEmailTextView.setText("Email: " + userEmail);
 
-            // Query Firestore to get user details based on email
-            Query query = db.collection("users").whereEqualTo("email", userEmail);
-            query.get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        // Retrieve user details from Firestore
-                        String name = document.getString("imie");
-                        String surname = document.getString("nazwisko");
-                        String address = document.getString("adres");
-                        String phoneNumber = document.getString("telefon");
+            // Retrieve user details from Firestore based on document ID (email)
+            db.collection("users").document(userEmail)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                // Retrieve user details from Firestore
+                                String name = document.getString("imie");
+                                String surname = document.getString("nazwisko");
+                                String address = document.getString("adres");
+                                String phoneNumber = document.getString("telefon");
 
-                        // Populate EditText fields with user details
-                        editTextName.setText(name);
-                        editTextSurname.setText(surname);
-                        editTextAddress.setText(address);
-                        editTextPhoneNumber.setText(phoneNumber);
-                    }
-                }
-            });
+                                // Populate EditText fields with user details
+                                editTextName.setText(name);
+                                editTextSurname.setText(surname);
+                            }
+                        }
+                    });
+
+            // Set a click listener for the Save button
+            saveButton.setOnClickListener(v -> saveUserData(userEmail));
         }
+    }
+
+    private void saveUserData(String userEmail) {
+        // Get updated user data from EditText fields
+        String name = editTextName.getText().toString();
+        String surname = editTextSurname.getText().toString();
+
+        // Create or update user document in Firestore
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("imie", name);
+        userData.put("nazwisko", surname);
+
+        db.collection("users").document(userEmail)
+                .set(userData)
+                .addOnSuccessListener(aVoid -> {
+                    // Document successfully written
+                    // You can add a Toast or other UI feedback here
+                })
+                .addOnFailureListener(e -> {
+                    // Handle failures
+                    // You can add a Toast or other UI feedback here
+                });
     }
 }

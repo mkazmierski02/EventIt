@@ -45,29 +45,18 @@
         android:inputType="textPersonName"/>
 
     <!-- EditText for address -->
-    <EditText
-        android:id="@+id/editTextAddress"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:hint="Adres zamieszkania"
-        app:layout_constraintTop_toBottomOf="@+id/editTextSurname"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:inputType="textPostalAddress"/>
 
     <!-- EditText for phone number -->
-    <EditText
-        android:id="@+id/editTextPhoneNumber"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:hint="Numer telefonu"
-        app:layout_constraintTop_toBottomOf="@+id/editTextAddress"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:inputType="phone"/>
 
-    <!-- Add any other UI elements you need for the UserPage activity here -->
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.452"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="196dp" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

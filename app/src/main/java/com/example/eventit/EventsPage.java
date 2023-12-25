@@ -1,5 +1,6 @@
 package com.example.eventit;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.NumberPicker;
@@ -12,17 +13,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 public class EventsPage extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private int availableTickets; // Variable to store the available tickets
-    private int selectedTickets; // Variable to store the selected number of tickets
 
     private TextView eventNameTextView;
     private TextView eventDetailsTextView;
     private TextView eventTicketsTextView;
-    private NumberPicker ticketNumberPicker;
+
     private Button buyTicketsButton;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -34,8 +40,9 @@ public class EventsPage extends AppCompatActivity {
         eventNameTextView = findViewById(R.id.event_name_text_view);
         eventDetailsTextView = findViewById(R.id.event_details_text_view);
         eventTicketsTextView = findViewById(R.id.event_tickets_text_view);
-        ticketNumberPicker = findViewById(R.id.ticket_number_picker);
         buyTicketsButton = findViewById(R.id.buy_tickets_button);
+        TextView eventDateTextView = findViewById(R.id.event_date_text_view);
+
 
         // Retrieve event ID from the intent
         String eventId = getIntent().getStringExtra("eventId");
@@ -52,42 +59,28 @@ public class EventsPage extends AppCompatActivity {
                         String eventDescription = document.getString("opis");
                         Double eventPrice = document.getDouble("cena");
                         availableTickets = document.getLong("bilety").intValue(); // Get available tickets
+                        Date eventDate = document.getDate("data"); // Get event date
+                        String city = document.getString("miasto");
+                        String street = document.getString("adres");
 
                         // Display event details
                         eventNameTextView.setText(eventName);
-                        eventDetailsTextView.setText("Dowiedz sie więcej o wydarzeniu... \n" + eventDescription);
-                        eventTicketsTextView.setText("Kup bilet juz za " + eventPrice + " zł");
+                        eventDetailsTextView.setText("Dowiedz się więcej o wydarzeniu... \n" + eventDescription);
+                        eventTicketsTextView.setText("Kup bilet już za " + eventPrice + " zł");
 
-                        // Set up NumberPicker
-                        ticketNumberPicker.setMinValue(1);
-                        ticketNumberPicker.setMaxValue(availableTickets);
-                        ticketNumberPicker.setValue(1);
+                        // Display event date
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+                        String formattedDate = dateFormat.format(eventDate);
+                        eventDateTextView.setText(formattedDate +  ", " + street + ", " + city);
 
-                        // Set up Button click listener
+
                         buyTicketsButton.setOnClickListener(view -> {
-                            // Get the selected number of tickets
-                            selectedTickets = ticketNumberPicker.getValue();
 
-                            // Handle the ticket purchase logic
-                            if (0 < availableTickets) {
-                                // Perform ticket purchase
-                                // You can add your logic here, e.g., update Firestore with the new ticket count
-                                Toast.makeText(this, "Bilety zakupione!", Toast.LENGTH_SHORT).show();
-
-                                // Update available tickets and adjust NumberPicker max value
-                                availableTickets -= selectedTickets;
-                                ticketNumberPicker.setMaxValue(availableTickets);
-                                ticketNumberPicker.setValue(1); // Reset NumberPicker to 1
-                            } else {
-                                Toast.makeText(this, "Nie wystarczająca ilość dostępnych biletów.", Toast.LENGTH_SHORT).show();
-                            }
+                            Intent intent = new Intent(EventsPage.this, PurchasePage.class);
+                            intent.putExtra("eventId", eventId);
+                            startActivity(intent);
                         });
-
-                    } else {
-                        // Handle the case where the document does not exist
                     }
-                } else {
-                    // Handle exceptions or errors
                 }
             });
         }

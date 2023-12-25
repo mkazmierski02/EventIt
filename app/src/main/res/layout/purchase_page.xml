@@ -1,0 +1,109 @@
+<!-- res/layout/purchase_page.xml -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PurchasePage">
+
+    <TextView
+        android:id="@+id/event_name_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text=""
+        android:textSize="20sp"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:id="@+id/event_date_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/event_name_text_view"
+        android:layout_marginTop="16dp"
+        android:text=""
+        android:textSize="18sp"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:id="@+id/event_price_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/event_date_text_view"
+        android:layout_marginTop="16dp"
+        android:text=""
+        android:textSize="18sp"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:id="@+id/event_location_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/event_price_text_view"
+        android:layout_marginTop="16dp"
+        android:text=""
+        android:textSize="18sp"
+        android:layout_centerHorizontal="true"/>
+
+    <EditText
+        android:id="@+id/first_name_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/event_location_text_view"
+        android:layout_marginTop="16dp"
+        android:hint="First Name"
+        android:textSize="18sp"
+        android:layout_centerHorizontal="true"/>
+
+    <EditText
+        android:id="@+id/last_name_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/first_name_edit_text"
+        android:layout_marginTop="16dp"
+        android:hint="Last Name"
+        android:textSize="18sp"
+        android:layout_centerHorizontal="true"/>
+    <EditText
+        android:id="@+id/email_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/last_name_edit_text"
+        android:layout_marginTop="16dp"
+        android:hint="Email"
+        android:textSize="18sp"
+        android:layout_centerHorizontal="true"
+        android:inputType="none" />
+
+    <!-- NumberPicker for adjusting ticket quantity -->
+    <NumberPicker
+        android:id="@+id/ticket_quantity_picker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/last_name_edit_text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="67dp"
+        android:max="10"
+        android:min="1"
+        android:textSize="18sp"
+        android:value="1" />
+
+    <TextView
+        android:id="@+id/total_price_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ticket_quantity_picker"
+        android:layout_marginTop="16dp"
+        android:text=""
+        android:textSize="18sp"
+        android:layout_centerHorizontal="true"/>
+
+    <!-- Purchase button -->
+    <Button
+        android:id="@+id/purchase_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/total_price_text_view"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="43dp"
+        android:text="Zamawiam i płace" />
+</RelativeLayout>

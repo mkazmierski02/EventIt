@@ -30,6 +30,11 @@
             android:name=".EventsPage"
             android:exported="true">
         </activity>
+        <activity
+            android:name=".UserPage"
+            android:exported="true">
+        </activity>
+
 
 
     </application>

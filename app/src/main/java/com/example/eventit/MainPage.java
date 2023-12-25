@@ -9,6 +9,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 
@@ -31,6 +32,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class MainPage extends AppCompatActivity {
 
@@ -38,6 +40,8 @@ public class MainPage extends AppCompatActivity {
     private FirebaseFirestore db;
     private List<String> allEvents;
     private List<String> displayedEvents;
+
+    private List<String> eventIds;
     private ArrayAdapter<String> adapter;
 
     private GoogleSignInClient mGoogleSignInClient;
@@ -53,9 +57,12 @@ public class MainPage extends AppCompatActivity {
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, GoogleSignInOptions.DEFAULT_SIGN_IN);
 
-        ListView eventListView = findViewById(R.id.event_list_view);
+        ImageView logoutButton = findViewById(R.id.logout_button);
 
-        Button logoutButton = findViewById(R.id.logout_button);
+        ImageView accountIcon = findViewById(R.id.account);
+
+
+        ListView eventListView = findViewById(R.id.event_list_view);
 
         EditText searchEditText = findViewById(R.id.search_edit_text);
 
@@ -76,6 +83,14 @@ public class MainPage extends AppCompatActivity {
                     });
         });
 
+        accountIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainPage.this, UserPage.class);
+                startActivity(intent);
+            }
+        });
+
 
         allEvents = new ArrayList<>();
         displayedEvents = new ArrayList<>();
@@ -83,6 +98,17 @@ public class MainPage extends AppCompatActivity {
         adapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_list_item_1, displayedEvents);
         eventListView.setAdapter(adapter);
+
+        eventListView.setOnItemClickListener((parent, view, position, id) -> {
+            if (position >= 0 && position < eventIds.size()) {
+                String selectedEventId = eventIds.get(position);
+                Intent intent = new Intent(MainPage.this, EventsPage.class);
+                intent.putExtra("eventId", selectedEventId);
+                startActivity(intent);
+            }
+        });
+
+
 
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -145,12 +171,16 @@ public class MainPage extends AppCompatActivity {
 
     private void readEventsFromFirestore() {
         CollectionReference eventsRef = db.collection("events");
-
+        eventIds = new ArrayList<>();
         eventsRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 allEvents.clear();
+                displayedEvents.clear();
+                eventIds.clear();
 
                 for (QueryDocumentSnapshot document : task.getResult()) {
+                    String eventId = document.getId();
+                    eventIds.add(eventId);
                     String eventName = document.getString("nazwa");
                     String eventDescription = document.getString("opis");
                     String eventCategory = document.getString("kategoria");
@@ -160,15 +190,16 @@ public class MainPage extends AppCompatActivity {
                     String eventDate = (date != null) ? formatDate(date) : "";
 
                     Double eventPrice = document.getDouble("cena");
+                    int maxTickets = Objects.requireNonNull(document.getLong("max_bilety")).intValue();
+                    int tickets = document.getLong("bilety").intValue();
+
                     String priceString = (eventPrice != null) ? String.valueOf(eventPrice) : "";
 
-                    String eventString = "Nazwa: " + eventName + "\nCena: " + priceString + "\nData: " + eventDate + "\nKategoria: " + eventCategory;
+                    String eventString = "Nazwa: " + eventName + "\nCena: " + priceString + "\nData: " + eventDate + "\nBilety: " + tickets + "/" + maxTickets + "\nKategoria: " + eventCategory ;
                     allEvents.add(eventString);
                 }
 
                 filterEvents("");
-            } else {
-
             }
         });
     }
@@ -219,6 +250,7 @@ public class MainPage extends AppCompatActivity {
                     Date dateTime2 = sdf.parse(date2);
 
                     // Compare dates
+                    assert dateTime1 != null;
                     return dateTime1.compareTo(dateTime2);
                 } catch (Exception e) {
                     e.printStackTrace();

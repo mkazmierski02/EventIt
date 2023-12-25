@@ -6,11 +6,24 @@
     android:layout_height="match_parent"
     tools:context=".MainPage">
 
-    <Button
+    <TextView
+        android:id="@+id/appTitle"
+        android:layout_width="226dp"
+        android:layout_height="65dp"
+        android:layout_marginTop="4dp"
+        android:text="EVENTIT"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.643"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
         android:id="@+id/logout_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Wyloguj się"
+        android:layout_width="46dp"
+        android:layout_height="58dp"
+        android:src="@drawable/logout"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -18,30 +31,30 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
-    <Button
-        android:id="@+id/ticket_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Bilety"
+    <ImageView
+        android:id="@+id/account"
+        android:layout_width="46dp"
+        android:layout_height="58dp"
+        android:src="@drawable/account"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.819"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
-    <TextView
-        android:id="@+id/category_name_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textSize="20sp"
+    <ImageView
+        android:id="@+id/ticket"
+        android:layout_width="46dp"
+        android:layout_height="58dp"
+        android:src="@drawable/ticket"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.975"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.291" />
+        app:layout_constraintVertical_bias="0.0" />
+
 
     <EditText
         android:id="@+id/search_edit_text"
@@ -55,21 +68,21 @@
         app:layout_constraintTop_toBottomOf="@+id/logout_button"
         app:layout_constraintVertical_bias="0.014" />
 
+
     <Spinner
         android:id="@+id/sort_spinner"
         android:layout_width="411dp"
-        android:layout_height="30dp"
-        android:layout_marginTop="28dp"
+        android:layout_height="42dp"
+        android:layout_marginTop="44dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/search_edit_text" />
 
-
     <Spinner
         android:id="@+id/category_spinner"
         android:layout_width="411dp"
-        android:layout_height="30dp"
+        android:layout_height="42dp"
         android:entries="@array/category_options"
         app:layout_constraintBottom_toTopOf="@+id/sort_spinner"
         app:layout_constraintEnd_toEndOf="parent"
@@ -89,6 +102,6 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/sort_spinner"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

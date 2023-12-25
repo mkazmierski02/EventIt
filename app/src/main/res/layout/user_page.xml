@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- TextView for displaying user email -->
+    <TextView
+        android:id="@+id/user_email_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text=""
+        android:textSize="20sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/editTextName"
+        app:layout_constraintVertical_bias="0.07" />
+
+    <!-- EditText for name -->
+    <EditText
+        android:id="@+id/editTextName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Imię"
+        android:inputType="textPersonName"
+        app:layout_constraintTop_toBottomOf="@+id/user_email_text_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- EditText for surname -->
+    <EditText
+        android:id="@+id/editTextSurname"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Nazwisko"
+        app:layout_constraintTop_toBottomOf="@+id/editTextName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:inputType="textPersonName"/>
+
+    <!-- EditText for address -->
+    <EditText
+        android:id="@+id/editTextAddress"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Adres zamieszkania"
+        app:layout_constraintTop_toBottomOf="@+id/editTextSurname"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:inputType="textPostalAddress"/>
+
+    <!-- EditText for phone number -->
+    <EditText
+        android:id="@+id/editTextPhoneNumber"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Numer telefonu"
+        app:layout_constraintTop_toBottomOf="@+id/editTextAddress"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:inputType="phone"/>
+
+    <!-- Add any other UI elements you need for the UserPage activity here -->
+
+</androidx.constraintlayout.widget.ConstraintLayout>

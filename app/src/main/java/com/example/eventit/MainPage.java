@@ -61,6 +61,8 @@ public class MainPage extends AppCompatActivity {
 
         ImageView accountIcon = findViewById(R.id.account);
 
+        ImageView ticketIcon = findViewById(R.id.ticket);
+
 
         ListView eventListView = findViewById(R.id.event_list_view);
 
@@ -69,6 +71,7 @@ public class MainPage extends AppCompatActivity {
         Spinner sortSpinner = findViewById(R.id.sort_spinner);
 
         Spinner categorySpinner = findViewById(R.id.category_spinner);
+
 
         readEventsFromFirestore();
 
@@ -87,6 +90,14 @@ public class MainPage extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainPage.this, UserPage.class);
+                startActivity(intent);
+            }
+        });
+        ticketIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Przekieruj użytkownika do PurchaseHistoryPage
+                Intent intent = new Intent(MainPage.this, PurchaseHistoryPage.class);
                 startActivity(intent);
             }
         });
@@ -142,6 +153,9 @@ public class MainPage extends AppCompatActivity {
                     sortByPriceAscending();
                 } else if (selectedSortOption.equals("Sortowanie od najdroższych")) {
                     sortByPriceDescending();
+                } else if (selectedSortOption.equals("Sortowanie: Brak")) {
+                    // Dodaj kod do zresetowania sortowania i wrócenia do pierwotnego wyświetlania
+                    resetSorting();
                 }
             }
 
@@ -178,32 +192,46 @@ public class MainPage extends AppCompatActivity {
                 displayedEvents.clear();
                 eventIds.clear();
 
+                Date currentDate = new Date(); // Aktualna data
+
                 for (QueryDocumentSnapshot document : task.getResult()) {
-                    String eventId = document.getId();
-                    eventIds.add(eventId);
-                    String eventName = document.getString("nazwa");
-                    String eventDescription = document.getString("opis");
-                    String eventCategory = document.getString("kategoria");
-                    String city = document.getString("miasto");
-                    String street = document.getString("adres");
+                    int ticketsAvailable = document.getLong("bilety").intValue();
 
-                    Timestamp timestamp = document.getTimestamp("data");
-                    Date date = (timestamp != null) ? timestamp.toDate() : null;
-                    String eventDate = (date != null) ? formatDate(date) : "";
+                    // Sprawdzenie, czy dostępne są bilety i data jest przyszła
+                    if (ticketsAvailable > 0 && isFutureDate(document)) {
+                        String eventId = document.getId();
+                        eventIds.add(eventId);
+                        String eventName = document.getString("nazwa");
+                        String eventDescription = document.getString("opis");
+                        String eventCategory = document.getString("kategoria");
+                        String city = document.getString("miasto");
+                        String street = document.getString("adres");
 
-                    Double eventPrice = document.getDouble("cena");
-                    int maxTickets = Objects.requireNonNull(document.getLong("max_bilety")).intValue();
-                    int tickets = document.getLong("bilety").intValue();
+                        Timestamp timestamp = document.getTimestamp("data");
+                        Date date = (timestamp != null) ? timestamp.toDate() : null;
+                        String eventDate = (date != null) ? formatDate(date) : "";
 
-                    String priceString = (eventPrice != null) ? String.valueOf(eventPrice) : "";
+                        Double eventPrice = document.getDouble("cena");
 
-                    String eventString = "Nazwa: " + eventName + "\nCena: " + priceString + "\nData: " + eventDate + "\nAdres: " + street + ", " + city + "\nKategoria: " + eventCategory ;
-                    allEvents.add(eventString);
+                        String priceString = (eventPrice != null) ? String.valueOf(eventPrice) : "";
+
+                        String eventString = "Nazwa: " + eventName + "\nCena: " + priceString + "\nData: " + eventDate + "\nAdres: " + street + ", " + city + "\nKategoria: " + eventCategory;
+                        allEvents.add(eventString);
+                    }
                 }
+
+                // Zainicjowanie displayedEvents wszystkimi wydarzeniami
+                displayedEvents.addAll(allEvents);
 
                 filterEvents("");
             }
         });
+    }
+
+    private boolean isFutureDate(QueryDocumentSnapshot document) {
+        Timestamp timestamp = document.getTimestamp("data");
+        Date eventDate = (timestamp != null) ? timestamp.toDate() : null;
+        return (eventDate != null && eventDate.after(new Date()));
     }
     private String formatDate(Date date) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
@@ -228,7 +256,8 @@ public class MainPage extends AppCompatActivity {
         displayedEvents.clear();
 
         for (String event : allEvents) {
-            if (selectedCategory.equals("Wszystkie") || event.toLowerCase().contains(selectedCategory.toLowerCase())) {
+            // Dodaj wszystkie wydarzenia, gdy wybrana kategoria to "Wszystkie"
+            if (selectedCategory.equals("Kategoria: Wszystkie") || event.toLowerCase().contains(selectedCategory.toLowerCase())) {
                 displayedEvents.add(event);
             }
         }
@@ -289,4 +318,12 @@ public class MainPage extends AppCompatActivity {
 
         adapter.notifyDataSetChanged();
     }
+
+    private void resetSorting() {
+        // Zresetuj sortowanie i wróć do pierwotnej listy wydarzeń
+        displayedEvents.clear();
+        displayedEvents.addAll(allEvents);
+        adapter.notifyDataSetChanged();
+    }
+
 }

@@ -50,7 +50,7 @@ public class UserPage extends AppCompatActivity {
             userEmailTextView.setText("Email: " + userEmail);
 
             // Retrieve user details from Firestore based on document ID (email)
-            db.collection("users").document(userEmail)
+            db.collection("users").document(user.getUid()) // Use UID as the document ID
                     .get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
@@ -59,8 +59,6 @@ public class UserPage extends AppCompatActivity {
                                 // Retrieve user details from Firestore
                                 String name = document.getString("imie");
                                 String surname = document.getString("nazwisko");
-                                String address = document.getString("adres");
-                                String phoneNumber = document.getString("telefon");
 
                                 // Populate EditText fields with user details
                                 editTextName.setText(name);
@@ -70,11 +68,11 @@ public class UserPage extends AppCompatActivity {
                     });
 
             // Set a click listener for the Save button
-            saveButton.setOnClickListener(v -> saveUserData(userEmail));
+            saveButton.setOnClickListener(v -> saveUserData(user.getUid()));
         }
     }
 
-    private void saveUserData(String userEmail) {
+    private void saveUserData(String userId) {
         // Get updated user data from EditText fields
         String name = editTextName.getText().toString();
         String surname = editTextSurname.getText().toString();
@@ -84,7 +82,7 @@ public class UserPage extends AppCompatActivity {
         userData.put("imie", name);
         userData.put("nazwisko", surname);
 
-        db.collection("users").document(userEmail)
+        db.collection("users").document(userId) // Use UID as the document ID
                 .set(userData)
                 .addOnSuccessListener(aVoid -> {
                     // Document successfully written

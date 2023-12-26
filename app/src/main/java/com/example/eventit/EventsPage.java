@@ -59,7 +59,7 @@ public class EventsPage extends AppCompatActivity {
                         String eventDescription = document.getString("opis");
                         Double eventPrice = document.getDouble("cena");
                         availableTickets = document.getLong("bilety").intValue(); // Get available tickets
-                        Date eventDate = document.getDate("data"); // Get event date
+                        Date eventDate = document.getDate("data");// Get event date
                         String city = document.getString("miasto");
                         String street = document.getString("adres");
 

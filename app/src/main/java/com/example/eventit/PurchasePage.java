@@ -1,6 +1,9 @@
 package com.example.eventit;
 
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
+import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.NumberPicker;
@@ -17,8 +20,13 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class PurchasePage extends AppCompatActivity {
+
+    private static final String TAG = "PurchasePage";
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
@@ -27,13 +35,14 @@ public class PurchasePage extends AppCompatActivity {
     private TextView eventDateTextView;
     private TextView eventPriceTextView;
     private TextView eventLocationTextView;
-    private EditText firstNameEditText; // Change to EditText for first name
-    private EditText lastNameEditText; // Change to EditText for last name
+    private EditText firstNameEditText;
+    private EditText lastNameEditText;
     private EditText emailEditText;
-    private NumberPicker ticketQuantityPicker; // NumberPicker for ticket quantity
-    private TextView totalPriceTextView; // Added TextView for displaying total price
-    private Button purchaseButton; // Added Button for the purchase
-    private double eventPrice; // Added variable to store event price
+    private NumberPicker ticketQuantityPicker;
+    private TextView totalPriceTextView;
+    private Button purchaseButton;
+    private double eventPrice;
+    private String eventId; // Added variable to store event ID
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -49,13 +58,13 @@ public class PurchasePage extends AppCompatActivity {
         eventLocationTextView = findViewById(R.id.event_location_text_view);
         firstNameEditText = findViewById(R.id.first_name_edit_text);
         lastNameEditText = findViewById(R.id.last_name_edit_text);
-        ticketQuantityPicker = findViewById(R.id.ticket_quantity_picker); // Initialize NumberPicker
-        totalPriceTextView = findViewById(R.id.total_price_text_view); // Initialize total price TextView
-        purchaseButton = findViewById(R.id.purchase_button); // Initialize purchase button
+        ticketQuantityPicker = findViewById(R.id.ticket_quantity_picker);
+        totalPriceTextView = findViewById(R.id.total_price_text_view);
+        purchaseButton = findViewById(R.id.purchase_button);
         emailEditText = findViewById(R.id.email_edit_text);
 
         // Retrieve event ID from the intent
-        String eventId = getIntent().getStringExtra("eventId");
+        eventId = getIntent().getStringExtra("eventId");
 
         // Check if eventId is not null
         if (eventId != null) {
@@ -75,11 +84,7 @@ public class PurchasePage extends AppCompatActivity {
 
                         // Display event details on PurchasePage
                         eventNameTextView.setText("Nazwa wydarzenia: " + eventName);
-
-                        // Display event price
                         eventPriceTextView.setText("Cena: " + eventPrice + " zł");
-
-                        // Display event location
                         eventLocationTextView.setText("Adres: " + street + ", " + city);
 
                         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
@@ -88,49 +93,102 @@ public class PurchasePage extends AppCompatActivity {
 
                         // Set a listener for the ticketQuantityPicker to update total price when quantity changes
                         ticketQuantityPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
-                            updateTotalPrice(); // Update total price when the ticket quantity changes
+                            updateTotalPrice();
                         });
                     }
                 }
             });
 
-            // Retrieve user data based on email
+            // Retrieve user data based on user ID
             FirebaseUser currentUser = auth.getCurrentUser();
             if (currentUser != null) {
-                String userEmail = currentUser.getEmail();
-                if (userEmail != null) {
-                    emailEditText.setText(userEmail);
+                String userId = currentUser.getUid();
 
-                    db.collection("users").document(userEmail)
-                            .get()
-                            .addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    DocumentSnapshot document = task.getResult();
-                                    if (document.exists()) {
-                                        // Retrieve user details from Firestore
-                                        String name = document.getString("imie");
-                                        String surname = document.getString("nazwisko");
-                                        // Populate EditText fields with user details
-                                        firstNameEditText.setText(name);
-                                        lastNameEditText.setText(surname);
-                                    }
+                db.collection("users").document(userId)
+                        .get()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    String name = document.getString("imie");
+                                    String surname = document.getString("nazwisko");
+                                    emailEditText.setText(currentUser.getEmail());
+                                    firstNameEditText.setText(name);
+                                    lastNameEditText.setText(surname);
                                 }
-                            });
-                }
+                            }
+                        });
             }
         }
 
         // Set a click listener for the purchaseButton
         purchaseButton.setOnClickListener(view -> {
-            // Implement the purchase logic here
-            int selectedQuantity = ticketQuantityPicker.getValue();
-            double total = selectedQuantity * eventPrice;
-            String message = "Purchase button clicked!\nTotal Price: " + total + " zł";
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            FirebaseUser currentUser = auth.getCurrentUser();
+            if (currentUser != null) {
+                String userId = currentUser.getUid();
+                String firstName = firstNameEditText.getText().toString();
+                String lastName = lastNameEditText.getText().toString();
+                String userEmailShipping = emailEditText.getText().toString();
+
+                if (isValidEmail(userEmailShipping)) {
+                    int selectedQuantity = ticketQuantityPicker.getValue();
+                    int availableTickets = ticketQuantityPicker.getMaxValue();
+
+                    if (selectedQuantity <= availableTickets) {
+                        int newAvailableTickets = availableTickets - selectedQuantity;
+                        // Update the number of available tickets in the event document
+                        db.collection("events").document(eventId)
+                                .update("bilety", newAvailableTickets)
+                                .addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        // Event tickets updated successfully
+                                        updateAvailableTickets(newAvailableTickets);
+                                        double total = selectedQuantity * eventPrice;
+                                        createPurchaseHistoryDocument(userId, userEmailShipping, firstName, lastName, eventId, selectedQuantity, total);
+                                        String message = "Purchase successful!\nTotal Price: " + totalPriceTextView.getText().toString();
+                                        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        // Failed to update event tickets
+                                        Toast.makeText(this, "Failed to update event tickets", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    } else {
+                        // Not enough tickets available
+                        Toast.makeText(this, "Not enough tickets available", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    // Invalid email address
+                    Toast.makeText(this, "Invalid email address", Toast.LENGTH_SHORT).show();
+                }
+            }
         });
     }
 
-    // Method to update the total price based on the selected ticket quantity
+    private void updateAvailableTickets(int newAvailableTickets) {
+        ticketQuantityPicker.setMaxValue(newAvailableTickets);
+        ticketQuantityPicker.setValue(1); // Reset ticket quantity to 1 after purchase
+    }
+
+    private void createPurchaseHistoryDocument(String userId, String userEmailShipping, String firstName, String lastName, String eventId, int quantity, double total) {
+        Map<String, Object> purchaseData = new HashMap<>();
+        purchaseData.put("id_uzytkownika", userId);
+        purchaseData.put("email", userEmailShipping);
+        purchaseData.put("imie", firstName);
+        purchaseData.put("nazwisko", lastName);
+        purchaseData.put("id_wydarzenia", eventId);
+        purchaseData.put("ilosc_zakupionych_biletow", quantity);
+        purchaseData.put("calkowita_cena", total);
+
+        db.collection("purchase history")
+                .add(purchaseData)
+                .addOnSuccessListener(documentReference -> Log.d(TAG, "Purchase history document added with ID: " + documentReference.getId()))
+                .addOnFailureListener(e -> Log.w(TAG, "Error adding purchase history document", e));
+    }
+
+    private boolean isValidEmail(CharSequence target) {
+        return !TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches();
+    }
+
     private void updateTotalPrice() {
         int selectedQuantity = ticketQuantityPicker.getValue();
         double total = selectedQuantity * eventPrice;

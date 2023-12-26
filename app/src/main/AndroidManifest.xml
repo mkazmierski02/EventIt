@@ -35,7 +35,7 @@
             android:exported="true">
         </activity>
         <activity
-            android:name=".TicketsPage"
+            android:name=".PurchaseHistoryPage"
             android:exported="true">
         </activity>
         <activity

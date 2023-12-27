@@ -29,11 +29,6 @@ public class PurchasePage extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
-
-    private TextView eventNameTextView;
-    private TextView eventDateTextView;
-    private TextView eventPriceTextView;
-    private TextView eventLocationTextView;
     private EditText firstNameEditText;
     private EditText lastNameEditText;
     private EditText emailEditText;
@@ -51,10 +46,6 @@ public class PurchasePage extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
 
-        //eventNameTextView = findViewById(R.id.event_name_text_view);
-        eventDateTextView = findViewById(R.id.event_date_text_view);
-        //eventPriceTextView = findViewById(R.id.event_price_text_view);
-        //eventLocationTextView = findViewById(R.id.event_location_text_view);
         firstNameEditText = findViewById(R.id.first_name_edit_text);
         lastNameEditText = findViewById(R.id.last_name_edit_text);
         ticketQuantityPicker = findViewById(R.id.ticket_quantity_picker);
@@ -69,22 +60,9 @@ public class PurchasePage extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
-                        // Process event details
-                        String eventName = document.getString("nazwa");
                         eventPrice = document.getDouble("cena");
-                        String city = document.getString("miasto");
-                        String street = document.getString("adres");
-                        Date eventDate = document.getDate("data");
                         int tickets = document.getLong("bilety").intValue();
                         ticketQuantityPicker.setMaxValue(tickets);
-
-                        //eventNameTextView.setText("Nazwa: " + eventName);
-                        //eventPriceTextView.setText("Cena: " + eventPrice + " zł");
-
-                        //SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm, dd-MM-yyyy ");
-                        //String formattedDate = dateFormat.format(eventDate);
-                        //eventDateTextView.setText(formattedDate + ", " + street + ", " + city);
-
                         ticketQuantityPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
                             updateTotalPrice();
                         });
@@ -126,36 +104,31 @@ public class PurchasePage extends AppCompatActivity {
                     int selectedQuantity = ticketQuantityPicker.getValue();
                     int availableTickets = ticketQuantityPicker.getMaxValue();
 
-                    if (selectedQuantity <= availableTickets) {
+                    if (selectedQuantity > 0 && selectedQuantity <= availableTickets) {
                         int newAvailableTickets = availableTickets - selectedQuantity;
                         db.collection("events").document(eventId)
                                 .update("bilety", newAvailableTickets)
                                 .addOnCompleteListener(task -> {
                                     if (task.isSuccessful()) {
-                                        // Event tickets updated successfully
                                         updateAvailableTickets(newAvailableTickets);
                                         double total = selectedQuantity * eventPrice;
                                         createPurchaseHistoryDocument(userId, userEmailShipping, firstName, lastName, eventId, selectedQuantity, total);
-                                        String message = "Purchase successful!\nTotal Price: " + totalPriceTextView.getText().toString();
+                                        String message = "Zakup udany!\nKońcowa cena: " + totalPriceTextView.getText().toString();
                                         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        // Failed to update event tickets
-                                        Toast.makeText(this, "Failed to update event tickets", Toast.LENGTH_SHORT).show();
                                     }
                                 });
                     } else {
-                        Toast.makeText(this, "Not enough tickets available", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Wybierz co najmniej jeden bilet.", Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    Toast.makeText(this, "Invalid email address", Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
     private void updateAvailableTickets(int newAvailableTickets) {
+
         ticketQuantityPicker.setMaxValue(newAvailableTickets);
-        ticketQuantityPicker.setValue(1); // Reset ticket quantity to 1 after purchase
+        ticketQuantityPicker.setValue(1);
     }
 
     private void createPurchaseHistoryDocument(String userId, String userEmailShipping, String firstName, String lastName, String eventId, int quantity, double total) {
@@ -169,9 +142,7 @@ public class PurchasePage extends AppCompatActivity {
         purchaseData.put("calkowita_cena", total);
 
         db.collection("purchase history")
-                .add(purchaseData)
-                .addOnSuccessListener(documentReference -> Log.d(TAG, "Purchase history document added with ID: " + documentReference.getId()))
-                .addOnFailureListener(e -> Log.w(TAG, "Error adding purchase history document", e));
+                .add(purchaseData);
     }
 
     private boolean isValidEmail(CharSequence target) {

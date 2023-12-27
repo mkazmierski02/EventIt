@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -71,7 +73,9 @@ public class UserPage extends AppCompatActivity {
         userData.put("nazwisko", surname);
 
         db.collection("users").document(userId)
-                .set(userData);
+                .set(userData).addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Dane zostały zaktualizowane.", Toast.LENGTH_SHORT).show();
+                });
 
     }
 }

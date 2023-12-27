@@ -33,7 +33,6 @@ public class PurchaseHistoryPage extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-
         eventListView = findViewById(R.id.event_list_view);
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         eventListView.setAdapter(adapter);
@@ -67,26 +66,21 @@ public class PurchaseHistoryPage extends AppCompatActivity {
                                                 Date eventDate = eventDocument.getDate("data");
                                                 String eventAddress = eventDocument.getString("adres");
 
-                                                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+                                                SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm, dd-MM-yyyy ");
                                                 String formattedDate = dateFormat.format(eventDate);
 
                                                 String eventDetails = finalPosition + ".\n" +"Nazwa: " + eventName +
-                                                        "\nAdres: " + eventAddress +"," + eventLocation +
+                                                        "\nAdres: " + eventAddress +", " + eventLocation +
                                                         "\nData: " + formattedDate +
                                                         "\nImie: " + userName +
                                                         "\nNazwisko: " + userSurname +
-                                                        "\nCalkowita cena: " + totalPrice +
+                                                        "\nCalkowita cena: " + totalPrice + " zł" +
                                                         "\nIlosc zakupionych biletow: " + quantity;
                                                 adapter.add(eventDetails);
-                                            } else {
-                                                Log.d(TAG, "No such document");
                                             }
-                                        })
-                                        .addOnFailureListener(e -> Log.w(TAG, "Error getting event document", e));
+                                        });
                                 position++;
                             }
-                        } else {
-                            Log.w(TAG, "Error getting purchase history documents.", task.getException());
                         }
                     });
         }

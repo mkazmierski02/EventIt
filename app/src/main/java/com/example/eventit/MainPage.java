@@ -191,7 +191,6 @@ public class MainPage extends AppCompatActivity {
                 displayedEvents.clear();
                 eventIds.clear();
 
-
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     int ticketsAvailable = document.getLong("bilety").intValue();
 
@@ -211,7 +210,7 @@ public class MainPage extends AppCompatActivity {
 
                         String priceString = (eventPrice != null) ? String.valueOf(eventPrice) : "";
 
-                        String eventString = "Nazwa: " + eventName + "\nCena: " + priceString + "\nData: " + formattedDate + "\nAdres: " + street + ", " + city + "\nKategoria: " + eventCategory;
+                        String eventString = "Nazwa: " + eventName + "\nCena: " + priceString + " zł\nData: " + formattedDate + "\nAdres: " + street + ", " + city + "\nKategoria: " + eventCategory;
                         allEvents.add(eventString);
                     }
                 }

@@ -154,7 +154,6 @@ public class MainPage extends AppCompatActivity {
                 } else if (selectedSortOption.equals("Sortowanie od najdroższych")) {
                     sortByPriceDescending();
                 } else if (selectedSortOption.equals("Sortowanie: Brak")) {
-                    // Dodaj kod do zresetowania sortowania i wrócenia do pierwotnego wyświetlania
                     resetSorting();
                 }
             }
@@ -192,35 +191,31 @@ public class MainPage extends AppCompatActivity {
                 displayedEvents.clear();
                 eventIds.clear();
 
-                Date currentDate = new Date(); // Aktualna data
 
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     int ticketsAvailable = document.getLong("bilety").intValue();
 
-                    // Sprawdzenie, czy dostępne są bilety i data jest przyszła
                     if (ticketsAvailable > 0 && isFutureDate(document)) {
                         String eventId = document.getId();
                         eventIds.add(eventId);
                         String eventName = document.getString("nazwa");
-                        String eventDescription = document.getString("opis");
                         String eventCategory = document.getString("kategoria");
                         String city = document.getString("miasto");
                         String street = document.getString("adres");
-
-                        Timestamp timestamp = document.getTimestamp("data");
-                        Date date = (timestamp != null) ? timestamp.toDate() : null;
-                        String eventDate = (date != null) ? formatDate(date) : "";
+                        ;
+                        Date eventDate = document.getDate("data");
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+                        String formattedDate = dateFormat.format(eventDate);
 
                         Double eventPrice = document.getDouble("cena");
 
                         String priceString = (eventPrice != null) ? String.valueOf(eventPrice) : "";
 
-                        String eventString = "Nazwa: " + eventName + "\nCena: " + priceString + "\nData: " + eventDate + "\nAdres: " + street + ", " + city + "\nKategoria: " + eventCategory;
+                        String eventString = "Nazwa: " + eventName + "\nCena: " + priceString + "\nData: " + formattedDate + "\nAdres: " + street + ", " + city + "\nKategoria: " + eventCategory;
                         allEvents.add(eventString);
                     }
                 }
 
-                // Zainicjowanie displayedEvents wszystkimi wydarzeniami
                 displayedEvents.addAll(allEvents);
 
                 filterEvents("");
@@ -232,10 +227,6 @@ public class MainPage extends AppCompatActivity {
         Timestamp timestamp = document.getTimestamp("data");
         Date eventDate = (timestamp != null) ? timestamp.toDate() : null;
         return (eventDate != null && eventDate.after(new Date()));
-    }
-    private String formatDate(Date date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-        return sdf.format(date);
     }
 
     private void filterEvents(String searchText) {
@@ -256,7 +247,6 @@ public class MainPage extends AppCompatActivity {
         displayedEvents.clear();
 
         for (String event : allEvents) {
-            // Dodaj wszystkie wydarzenia, gdy wybrana kategoria to "Wszystkie"
             if (selectedCategory.equals("Kategoria: Wszystkie") || event.toLowerCase().contains(selectedCategory.toLowerCase())) {
                 displayedEvents.add(event);
             }
@@ -320,7 +310,6 @@ public class MainPage extends AppCompatActivity {
     }
 
     private void resetSorting() {
-        // Zresetuj sortowanie i wróć do pierwotnej listy wydarzeń
         displayedEvents.clear();
         displayedEvents.addAll(allEvents);
         adapter.notifyDataSetChanged();

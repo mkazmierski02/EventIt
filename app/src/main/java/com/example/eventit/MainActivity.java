@@ -106,7 +106,6 @@ public class MainActivity extends AppCompatActivity {
                         databaseReference.child(uid).setValue(newUser);
                         openMainPage();
                     } else {
-                        // Błąd logowania
                         Toast.makeText(MainActivity.this, "Błąd logowania", Toast.LENGTH_SHORT).show();
                     }
                 });

@@ -22,7 +22,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class PurchasePage extends AppCompatActivity {
 
@@ -42,7 +41,7 @@ public class PurchasePage extends AppCompatActivity {
     private TextView totalPriceTextView;
     private Button purchaseButton;
     private double eventPrice;
-    private String eventId; // Added variable to store event ID
+    private String eventId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -62,13 +61,10 @@ public class PurchasePage extends AppCompatActivity {
         totalPriceTextView = findViewById(R.id.total_price_text_view);
         purchaseButton = findViewById(R.id.purchase_button);
         emailEditText = findViewById(R.id.email_edit_text);
-
-        // Retrieve event ID from the intent
         eventId = getIntent().getStringExtra("eventId");
 
         // Check if eventId is not null
         if (eventId != null) {
-            // Retrieve event details from Firestore
             db.collection("events").document(eventId).get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
@@ -82,7 +78,6 @@ public class PurchasePage extends AppCompatActivity {
                         int tickets = document.getLong("bilety").intValue();
                         ticketQuantityPicker.setMaxValue(tickets);
 
-                        // Display event details on PurchasePage
                         eventNameTextView.setText("Nazwa wydarzenia: " + eventName);
                         eventPriceTextView.setText("Cena: " + eventPrice + " zł");
                         eventLocationTextView.setText("Adres: " + street + ", " + city);
@@ -91,7 +86,6 @@ public class PurchasePage extends AppCompatActivity {
                         String formattedDate = dateFormat.format(eventDate);
                         eventDateTextView.setText(formattedDate + ", " + street + ", " + city);
 
-                        // Set a listener for the ticketQuantityPicker to update total price when quantity changes
                         ticketQuantityPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
                             updateTotalPrice();
                         });
@@ -121,7 +115,6 @@ public class PurchasePage extends AppCompatActivity {
             }
         }
 
-        // Set a click listener for the purchaseButton
         purchaseButton.setOnClickListener(view -> {
             FirebaseUser currentUser = auth.getCurrentUser();
             if (currentUser != null) {
@@ -136,7 +129,6 @@ public class PurchasePage extends AppCompatActivity {
 
                     if (selectedQuantity <= availableTickets) {
                         int newAvailableTickets = availableTickets - selectedQuantity;
-                        // Update the number of available tickets in the event document
                         db.collection("events").document(eventId)
                                 .update("bilety", newAvailableTickets)
                                 .addOnCompleteListener(task -> {
@@ -153,11 +145,9 @@ public class PurchasePage extends AppCompatActivity {
                                     }
                                 });
                     } else {
-                        // Not enough tickets available
                         Toast.makeText(this, "Not enough tickets available", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    // Invalid email address
                     Toast.makeText(this, "Invalid email address", Toast.LENGTH_SHORT).show();
                 }
             }

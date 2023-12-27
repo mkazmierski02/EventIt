@@ -12,10 +12,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 public class PurchaseHistoryPage extends AppCompatActivity {
@@ -46,37 +44,30 @@ public class PurchaseHistoryPage extends AppCompatActivity {
         if (currentUser != null) {
             String userId = currentUser.getUid();
 
-            // Query to retrieve purchase history for the current user
             db.collection("purchase history")
                     .whereEqualTo("id_uzytkownika", userId)
                     .get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                // Retrieve event details from the purchase history document
                                 String eventId = document.getString("id_wydarzenia");
                                 String userName = document.getString("imie");
                                 String userSurname = document.getString("nazwisko");
                                 double totalPrice = document.getDouble("calkowita_cena");
                                 int quantity = document.getLong("ilosc_zakupionych_biletow").intValue();
 
-                                // Query to retrieve event details from the events collection
                                 db.collection("events").document(eventId)
                                         .get()
                                         .addOnSuccessListener(eventDocument -> {
                                             if (eventDocument.exists()) {
-                                                // Retrieve event details from the events document
                                                 String eventName = eventDocument.getString("nazwa");
                                                 String eventLocation = eventDocument.getString("miasto");
-                                                // Atrybut "data" typu Date
                                                 Date eventDate = eventDocument.getDate("data");
                                                 String eventAddress = eventDocument.getString("adres");
 
-                                                // Formatowanie daty do czytelniejszego formatu
                                                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
                                                 String formattedDate = dateFormat.format(eventDate);
 
-                                                // Add event details to the list view
                                                 String eventDetails = "Nazwa: " + eventName +
                                                         "\nMiasto: " + eventLocation +
                                                         "\nData: " + formattedDate +

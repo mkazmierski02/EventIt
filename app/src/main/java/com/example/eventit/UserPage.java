@@ -35,62 +35,43 @@ public class UserPage extends AppCompatActivity {
         editTextSurname = findViewById(R.id.editTextSurname);
         saveButton = findViewById(R.id.saveButton);
 
-        // Initialize Firestore
         db = FirebaseFirestore.getInstance();
 
-        // Fetch the current user
         FirebaseUser user = mAuth.getCurrentUser();
 
-        // Check if the user is not null
         if (user != null) {
-            // Get the user's email
             String userEmail = user.getEmail();
 
-            // Display the email in the TextView
             userEmailTextView.setText("Email: " + userEmail);
 
-            // Retrieve user details from Firestore based on document ID (email)
-            db.collection("users").document(user.getUid()) // Use UID as the document ID
+            db.collection("users").document(user.getUid())
                     .get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
-                                // Retrieve user details from Firestore
                                 String name = document.getString("imie");
                                 String surname = document.getString("nazwisko");
 
-                                // Populate EditText fields with user details
                                 editTextName.setText(name);
                                 editTextSurname.setText(surname);
                             }
                         }
                     });
-
-            // Set a click listener for the Save button
             saveButton.setOnClickListener(v -> saveUserData(user.getUid()));
         }
     }
 
     private void saveUserData(String userId) {
-        // Get updated user data from EditText fields
         String name = editTextName.getText().toString();
         String surname = editTextSurname.getText().toString();
 
-        // Create or update user document in Firestore
         Map<String, Object> userData = new HashMap<>();
         userData.put("imie", name);
         userData.put("nazwisko", surname);
 
-        db.collection("users").document(userId) // Use UID as the document ID
-                .set(userData)
-                .addOnSuccessListener(aVoid -> {
-                    // Document successfully written
-                    // You can add a Toast or other UI feedback here
-                })
-                .addOnFailureListener(e -> {
-                    // Handle failures
-                    // You can add a Toast or other UI feedback here
-                });
+        db.collection("users").document(userId)
+                .set(userData);
+
     }
 }

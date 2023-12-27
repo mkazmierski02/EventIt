@@ -60,10 +60,10 @@ public class EventsPage extends AppCompatActivity {
                         String imageUrl = document.getString("url"); // Pobierz URL zdjęcia
 
                         eventNameTextView.setText(eventName);
-                        eventDetailsTextView.setText("Dowiedz się więcej o wydarzeniu... \n" + eventDescription);
+                        eventDetailsTextView.setText(eventDescription);
                         eventTicketsTextView.setText("Kup bilet już za " + eventPrice + " zł");
 
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm, dd-MM-yyyy ");
                         String formattedDate = dateFormat.format(eventDate);
                         eventDateTextView.setText(formattedDate +  ", " + street + ", " + city);
 

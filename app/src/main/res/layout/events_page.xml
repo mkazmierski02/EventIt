@@ -17,59 +17,82 @@
 
     <TextView
         android:id="@+id/event_name_text_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
+        android:layout_width="411dp"
+        android:layout_height="55dp"
+        android:layout_marginTop="44dp"
+        android:padding="8dp"
         android:text=""
-        android:textSize="20sp"
-        app:layout_constraintTop_toBottomOf="@+id/event_image_view"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@+id/event_image_view" />
+
+    <TextView
+        android:id="@+id/app"
+        android:layout_width="403dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="13dp"
+        android:text="Dowiedz się więcej o wydarzeniu..."
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/event_details_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/event_name_text_view"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/event_details_text_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
+        android:layout_width="406dp"
+        android:layout_height="171dp"
+        android:layout_marginTop="52dp"
+        android:padding="4dp"
         android:text=""
         android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/event_name_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.444"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/event_name_text_view" />
 
     <TextView
         android:id="@+id/event_date_text_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:padding="16dp"
+        android:layout_width="407dp"
+        android:layout_height="44dp"
+        android:padding="6dp"
         android:text=""
         android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/event_details_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@+id/event_image_view" />
 
     <TextView
         android:id="@+id/event_tickets_text_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:padding="16dp"
+        android:layout_width="297dp"
+        android:layout_height="46dp"
+        android:padding="8dp"
         android:text=""
         android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/event_date_text_view"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@+id/event_details_text_view" />
 
     <Button
         android:id="@+id/buy_tickets_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="52dp"
+        android:layout_marginTop="6dp"
         android:text="Zamawiam"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/event_tickets_text_view" />
+        app:layout_constraintTop_toBottomOf="@id/event_tickets_text_view"
+        app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

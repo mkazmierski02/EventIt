@@ -51,10 +51,10 @@ public class PurchasePage extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
 
-        eventNameTextView = findViewById(R.id.event_name_text_view);
+        //eventNameTextView = findViewById(R.id.event_name_text_view);
         eventDateTextView = findViewById(R.id.event_date_text_view);
-        eventPriceTextView = findViewById(R.id.event_price_text_view);
-        eventLocationTextView = findViewById(R.id.event_location_text_view);
+        //eventPriceTextView = findViewById(R.id.event_price_text_view);
+        //eventLocationTextView = findViewById(R.id.event_location_text_view);
         firstNameEditText = findViewById(R.id.first_name_edit_text);
         lastNameEditText = findViewById(R.id.last_name_edit_text);
         ticketQuantityPicker = findViewById(R.id.ticket_quantity_picker);
@@ -78,13 +78,12 @@ public class PurchasePage extends AppCompatActivity {
                         int tickets = document.getLong("bilety").intValue();
                         ticketQuantityPicker.setMaxValue(tickets);
 
-                        eventNameTextView.setText("Nazwa wydarzenia: " + eventName);
-                        eventPriceTextView.setText("Cena: " + eventPrice + " zł");
-                        eventLocationTextView.setText("Adres: " + street + ", " + city);
+                        //eventNameTextView.setText("Nazwa: " + eventName);
+                        //eventPriceTextView.setText("Cena: " + eventPrice + " zł");
 
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-                        String formattedDate = dateFormat.format(eventDate);
-                        eventDateTextView.setText(formattedDate + ", " + street + ", " + city);
+                        //SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm, dd-MM-yyyy ");
+                        //String formattedDate = dateFormat.format(eventDate);
+                        //eventDateTextView.setText(formattedDate + ", " + street + ", " + city);
 
                         ticketQuantityPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
                             updateTotalPrice();

@@ -18,7 +18,7 @@ import java.util.Map;
 public class UserPage extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
-    private TextView userEmailTextView;
+    private EditText userEmailTextView;
     private EditText editTextName;
     private EditText editTextSurname;
     private FirebaseFirestore db;
@@ -42,7 +42,7 @@ public class UserPage extends AppCompatActivity {
         if (user != null) {
             String userEmail = user.getEmail();
 
-            userEmailTextView.setText("Email: " + userEmail);
+            userEmailTextView.setText(userEmail);
 
             db.collection("users").document(user.getUid())
                     .get()

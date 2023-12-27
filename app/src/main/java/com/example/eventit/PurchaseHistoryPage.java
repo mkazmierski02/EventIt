@@ -49,6 +49,7 @@ public class PurchaseHistoryPage extends AppCompatActivity {
                     .get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
+                            int position = 1;
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 String eventId = document.getString("id_wydarzenia");
                                 String userName = document.getString("imie");
@@ -56,6 +57,7 @@ public class PurchaseHistoryPage extends AppCompatActivity {
                                 double totalPrice = document.getDouble("calkowita_cena");
                                 int quantity = document.getLong("ilosc_zakupionych_biletow").intValue();
 
+                                int finalPosition = position;
                                 db.collection("events").document(eventId)
                                         .get()
                                         .addOnSuccessListener(eventDocument -> {
@@ -68,20 +70,20 @@ public class PurchaseHistoryPage extends AppCompatActivity {
                                                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
                                                 String formattedDate = dateFormat.format(eventDate);
 
-                                                String eventDetails = "Nazwa: " + eventName +
-                                                        "\nMiasto: " + eventLocation +
+                                                String eventDetails = finalPosition + ".\n" +"Nazwa: " + eventName +
+                                                        "\nAdres: " + eventAddress +"," + eventLocation +
                                                         "\nData: " + formattedDate +
-                                                        "\nAdres: " + eventAddress +
                                                         "\nImie: " + userName +
                                                         "\nNazwisko: " + userSurname +
-                                                        "\nCalkowita Cena: " + totalPrice +
-                                                        "\nIlosc Zakupionych Biletow: " + quantity;
+                                                        "\nCalkowita cena: " + totalPrice +
+                                                        "\nIlosc zakupionych biletow: " + quantity;
                                                 adapter.add(eventDetails);
                                             } else {
                                                 Log.d(TAG, "No such document");
                                             }
                                         })
                                         .addOnFailureListener(e -> Log.w(TAG, "Error getting event document", e));
+                                position++;
                             }
                         } else {
                             Log.w(TAG, "Error getting purchase history documents.", task.getException());

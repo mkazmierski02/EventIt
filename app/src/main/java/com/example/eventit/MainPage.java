@@ -204,7 +204,7 @@ public class MainPage extends AppCompatActivity {
                         String street = document.getString("adres");
                         ;
                         Date eventDate = document.getDate("data");
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm, dd-MM-yyyy");
                         String formattedDate = dateFormat.format(eventDate);
 
                         Double eventPrice = document.getDouble("cena");

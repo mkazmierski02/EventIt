@@ -198,19 +198,19 @@ public class MainPage extends AppCompatActivity {
                         String eventId = document.getId();
                         eventIds.add(eventId);
                         String eventName = document.getString("nazwa");
-                        String eventCategory = document.getString("kategoria");
+                        //String eventCategory = document.getString("kategoria");
                         String city = document.getString("miasto");
                         String street = document.getString("adres");
                         ;
                         Date eventDate = document.getDate("data");
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm, dd-MM-yyyy");
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                         String formattedDate = dateFormat.format(eventDate);
 
                         Double eventPrice = document.getDouble("cena");
 
                         String priceString = (eventPrice != null) ? String.valueOf(eventPrice) : "";
 
-                        String eventString = "Nazwa: " + eventName + "\nCena: " + priceString + " zł\nData: " + formattedDate + "\nAdres: " + street + ", " + city + "\nKategoria: " + eventCategory;
+                        String eventString = "Nazwa: " + eventName + "\nCena: " + priceString + " zł\nData: " + formattedDate + "\nAdres: " + street + ", " + city;
                         allEvents.add(eventString);
                     }
                 }
@@ -286,8 +286,12 @@ public class MainPage extends AppCompatActivity {
         Collections.sort(displayedEvents, new Comparator<String>() {
             @Override
             public int compare(String event1, String event2) {
-                double price1 = Double.parseDouble(event1.split("\n")[1].replace("Cena:", "").trim());
-                double price2 = Double.parseDouble(event2.split("\n")[1].replace("Cena:", "").trim());
+                String price1Str = event1.split("\n")[1].replace("Cena: ", "").replace(" zł", "").trim();
+                String price2Str = event2.split("\n")[1].replace("Cena: ", "").replace(" zł", "").trim();
+
+                double price1 = Double.parseDouble(price1Str);
+                double price2 = Double.parseDouble(price2Str);
+
                 return Double.compare(price1, price2);
             }
         });
@@ -299,8 +303,12 @@ public class MainPage extends AppCompatActivity {
         Collections.sort(displayedEvents, new Comparator<String>() {
             @Override
             public int compare(String event1, String event2) {
-                double price1 = Double.parseDouble(event1.split("\n")[1].replace("Cena:", "").trim());
-                double price2 = Double.parseDouble(event2.split("\n")[1].replace("Cena:", "").trim());
+                String price1Str = event1.split("\n")[1].replace("Cena: ", "").replace(" zł", "").trim();
+                String price2Str = event2.split("\n")[1].replace("Cena: ", "").replace(" zł", "").trim();
+
+                double price1 = Double.parseDouble(price1Str);
+                double price2 = Double.parseDouble(price2Str);
+
                 return Double.compare(price2, price1);
             }
         });

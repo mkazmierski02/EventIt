@@ -6,10 +6,6 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- Dodany napis "konto użytkownika" -->
-
-    <!-- Opis nad polem email -->
-
     <TextView
         android:id="@+id/accountTitleTextView"
         android:layout_width="266dp"
@@ -71,7 +67,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/nameDescriptionTextView" />
 
-    <!-- Opis nad polem nazwiska -->
     <TextView
         android:id="@+id/surnameDescriptionTextView"
         android:layout_width="0dp"

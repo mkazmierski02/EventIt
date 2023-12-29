@@ -89,8 +89,8 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"
-        app:layout_constraintWidth_default="wrap" />
+        app:layout_constraintVertical_bias="1.0" />
+
 
     <ListView
         android:id="@+id/event_list_view"

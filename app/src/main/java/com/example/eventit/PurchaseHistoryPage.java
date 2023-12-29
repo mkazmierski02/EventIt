@@ -79,8 +79,7 @@ public class PurchaseHistoryPage extends AppCompatActivity {
                                             String eventDetails = position + ".\n" + "Nazwa: " + eventName +
                                                     "\nAdres: " + eventAddress + ", " + eventLocation +
                                                     "\nData: " + formattedDate +
-                                                    "\nImie: " + userName +
-                                                    "\nNazwisko: " + userSurname +
+                                                    "\nDane klienta: " + userName + ", " + userSurname +
                                                     "\nCalkowita cena: " + totalPrice + " zł" +
                                                     "\nIlosc zakupionych biletow: " + quantity;
 

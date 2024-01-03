@@ -132,7 +132,7 @@ public class MainPage extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                filterEvents(editable.toString());
+                filterAndSortEvents(editable.toString(), categorySpinner.getSelectedItem().toString(), sortSpinner.getSelectedItem().toString());
             }
         });
 
@@ -146,16 +146,7 @@ public class MainPage extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                 String selectedSortOption = sortOptions[position];
-
-                if (selectedSortOption.equals("Sortowanie chronologicznie")) {
-                    sortByDate();
-                } else if (selectedSortOption.equals("Sortowanie od najtańszych")) {
-                    sortByPriceAscending();
-                } else if (selectedSortOption.equals("Sortowanie od najdroższych")) {
-                    sortByPriceDescending();
-                } else if (selectedSortOption.equals("Sortowanie: Brak")) {
-                    resetSorting();
-                }
+                filterAndSortEvents(searchEditText.getText().toString(), categorySpinner.getSelectedItem().toString(), selectedSortOption);
             }
 
             @Override
@@ -172,8 +163,7 @@ public class MainPage extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                 String selectedCategory = categoryOptions[position];
-
-                filterEventsByCategory(selectedCategory);
+                filterAndSortEvents(searchEditText.getText().toString(), selectedCategory, sortSpinner.getSelectedItem().toString());
             }
 
             @Override
@@ -198,10 +188,10 @@ public class MainPage extends AppCompatActivity {
                         String eventId = document.getId();
                         eventIds.add(eventId);
                         String eventName = document.getString("nazwa");
-                        //String eventCategory = document.getString("kategoria");
+                        String eventCategory = document.getString("kategoria");
                         String city = document.getString("miasto");
                         String street = document.getString("adres");
-                        ;
+
                         Date eventDate = document.getDate("data");
                         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                         String formattedDate = dateFormat.format(eventDate);
@@ -210,7 +200,7 @@ public class MainPage extends AppCompatActivity {
 
                         String priceString = (eventPrice != null) ? String.valueOf(eventPrice) : "";
 
-                        String eventString = "Nazwa: " + eventName + "\nCena: " + priceString + " zł\nData: " + formattedDate + "\nAdres: " + street + ", " + city;
+                        String eventString = "Nazwa: " + eventName + "\nCena: " + priceString + " zł\nData: " + formattedDate + "\nAdres: " + street + ", " + city + "\nKategoria: " + eventCategory;
                         allEvents.add(eventString);
                     }
                 }
@@ -220,6 +210,31 @@ public class MainPage extends AppCompatActivity {
                 filterEvents("");
             }
         });
+    }
+
+    private void filterAndSortEvents(String searchText, String selectedCategory, String selectedSortOption) {
+        displayedEvents.clear();
+
+        for (String event : allEvents) {
+            String eventName = event.split("\n")[0].replace("Nazwa: ", "").trim();
+            boolean isCategoryMatch = selectedCategory.equals("Kategoria: Wszystkie") || event.toLowerCase().contains(selectedCategory.toLowerCase());
+            boolean isNameMatch = eventName.toLowerCase().contains(searchText.toLowerCase());
+
+            if (isCategoryMatch && isNameMatch) {
+                displayedEvents.add(event);
+            }
+        }
+
+        if (selectedSortOption.equals("Sortowanie chronologicznie")) {
+            sortByDate();
+        } else if (selectedSortOption.equals("Sortowanie od najtańszych")) {
+            sortByPriceAscending();
+        } else if (selectedSortOption.equals("Sortowanie od najdroższych")) {
+            sortByPriceDescending();
+        } else if (selectedSortOption.equals("Sortowanie: Brak")) {
+        }
+
+        adapter.notifyDataSetChanged();
     }
 
     private boolean isFutureDate(QueryDocumentSnapshot document) {
@@ -242,19 +257,6 @@ public class MainPage extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    private void filterEventsByCategory(String selectedCategory) {
-        displayedEvents.clear();
-
-        for (String event : allEvents) {
-            if (selectedCategory.equals("Kategoria: Wszystkie") || event.toLowerCase().contains(selectedCategory.toLowerCase())) {
-                displayedEvents.add(event);
-            }
-        }
-
-        adapter.notifyDataSetChanged();
-    }
-
-
     private void sortByDate() {
         Collections.sort(displayedEvents, new Comparator<String>() {
             @Override
@@ -269,7 +271,6 @@ public class MainPage extends AppCompatActivity {
                     Date dateTime1 = sdf.parse(date1);
                     Date dateTime2 = sdf.parse(date2);
 
-                    // Compare dates
                     assert dateTime1 != null;
                     return dateTime1.compareTo(dateTime2);
                 } catch (Exception e) {
@@ -313,12 +314,6 @@ public class MainPage extends AppCompatActivity {
             }
         });
 
-        adapter.notifyDataSetChanged();
-    }
-
-    private void resetSorting() {
-        displayedEvents.clear();
-        displayedEvents.addAll(allEvents);
         adapter.notifyDataSetChanged();
     }
 

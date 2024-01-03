@@ -92,6 +92,8 @@ public class PurchasePage extends AppCompatActivity {
             }
         }
 
+        // ... (pozostała część kodu)
+
         purchaseButton.setOnClickListener(view -> {
             FirebaseUser currentUser = auth.getCurrentUser();
             if (currentUser != null) {
@@ -100,7 +102,7 @@ public class PurchasePage extends AppCompatActivity {
                 String lastName = lastNameEditText.getText().toString();
                 String userEmailShipping = emailEditText.getText().toString();
 
-                if (isValidEmail(userEmailShipping)) {
+                if (isValidEmail(userEmailShipping) && !TextUtils.isEmpty(firstName) && !TextUtils.isEmpty(lastName)) {
                     int selectedQuantity = ticketQuantityPicker.getValue();
                     int availableTickets = ticketQuantityPicker.getMaxValue();
 
@@ -120,9 +122,12 @@ public class PurchasePage extends AppCompatActivity {
                     } else {
                         Toast.makeText(this, "Wybierz co najmniej jeden bilet.", Toast.LENGTH_SHORT).show();
                     }
+                } else {
+                    Toast.makeText(this, "Uzupełnij poprawnie wszystkie pola.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
     }
 
     private void updateAvailableTickets(int newAvailableTickets) {
@@ -152,6 +157,7 @@ public class PurchasePage extends AppCompatActivity {
     private void updateTotalPrice() {
         int selectedQuantity = ticketQuantityPicker.getValue();
         double total = selectedQuantity * eventPrice;
-        totalPriceTextView.setText("Cena końcowa: " + total + " zł");
+        String formattedTotal = String.format("%.2f", total);
+        totalPriceTextView.setText("Cena końcowa: " + formattedTotal + " zł");
     }
 }

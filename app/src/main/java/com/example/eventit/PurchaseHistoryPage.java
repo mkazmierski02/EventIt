@@ -84,7 +84,7 @@ public class PurchaseHistoryPage extends AppCompatActivity {
                                                     "\nIlosc zakupionych biletow: " + quantity;
 
                                             adapter.add(eventDetails);
-                                            position.getAndIncrement(); // Zwiększ pozycję po dodaniu szczegółów wydarzenia
+                                            position.getAndIncrement();
                                         }
                                         return null;
                                     });

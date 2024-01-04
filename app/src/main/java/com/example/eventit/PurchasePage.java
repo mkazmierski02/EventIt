@@ -54,7 +54,6 @@ public class PurchasePage extends AppCompatActivity {
         emailEditText = findViewById(R.id.email_edit_text);
         eventId = getIntent().getStringExtra("eventId");
 
-        // Check if eventId is not null
         if (eventId != null) {
             db.collection("events").document(eventId).get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -70,10 +69,10 @@ public class PurchasePage extends AppCompatActivity {
                 }
             });
 
-            // Retrieve user data based on user ID
             FirebaseUser currentUser = auth.getCurrentUser();
             if (currentUser != null) {
                 String userId = currentUser.getUid();
+                emailEditText.setText(currentUser.getEmail());
 
                 db.collection("users").document(userId)
                         .get()
@@ -83,7 +82,6 @@ public class PurchasePage extends AppCompatActivity {
                                 if (document.exists()) {
                                     String name = document.getString("imie");
                                     String surname = document.getString("nazwisko");
-                                    emailEditText.setText(currentUser.getEmail());
                                     firstNameEditText.setText(name);
                                     lastNameEditText.setText(surname);
                                 }
@@ -91,8 +89,6 @@ public class PurchasePage extends AppCompatActivity {
                         });
             }
         }
-
-        // ... (pozostała część kodu)
 
         purchaseButton.setOnClickListener(view -> {
             FirebaseUser currentUser = auth.getCurrentUser();

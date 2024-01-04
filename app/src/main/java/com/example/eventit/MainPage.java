@@ -96,7 +96,6 @@ public class MainPage extends AppCompatActivity {
         ticketIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Przekieruj użytkownika do PurchaseHistoryPage
                 Intent intent = new Intent(MainPage.this, PurchaseHistoryPage.class);
                 startActivity(intent);
             }
@@ -110,14 +109,21 @@ public class MainPage extends AppCompatActivity {
                 this, android.R.layout.simple_list_item_1, displayedEvents);
         eventListView.setAdapter(adapter);
 
+
         eventListView.setOnItemClickListener((parent, view, position, id) -> {
-            if (position >= 0 && position < eventIds.size()) {
-                String selectedEventId = eventIds.get(position);
-                Intent intent = new Intent(MainPage.this, EventsPage.class);
-                intent.putExtra("eventId", selectedEventId);
-                startActivity(intent);
+            if (position >= 0 && position < displayedEvents.size()) {
+                String selectedEventString = displayedEvents.get(position);
+                int indexOfSelectedEvent = allEvents.indexOf(selectedEventString);
+
+                if (indexOfSelectedEvent >= 0 && indexOfSelectedEvent < eventIds.size()) {
+                    String selectedEventId = eventIds.get(indexOfSelectedEvent);
+                    Intent intent = new Intent(MainPage.this, EventsPage.class);
+                    intent.putExtra("eventId", selectedEventId);
+                    startActivity(intent);
+                }
             }
         });
+
 
 
 

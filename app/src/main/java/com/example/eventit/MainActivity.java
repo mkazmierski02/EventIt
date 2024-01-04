@@ -21,9 +21,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import java.util.Objects;
 
-
-
-
 public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -140,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
+                        Toast.makeText(MainActivity.this, "Rejestracja udana!", Toast.LENGTH_SHORT).show();
                     } else {
                         Log.e("TAG", "Błąd rejestracji: " + Objects.requireNonNull(task.getException()).getMessage());
                         Toast.makeText(MainActivity.this, "Błąd rejestracji", Toast.LENGTH_SHORT).show();
@@ -160,7 +158,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "Wprowadź hasło", Toast.LENGTH_SHORT).show();
             return false;
         }
-
         return true;
     }
 }

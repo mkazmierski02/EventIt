@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -13,7 +12,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -45,6 +43,7 @@ public class MainPage extends AppCompatActivity {
     private List<String> displayedEvents;
     private List<String> eventIds;
     private List<String> eventImageUrls;
+    private List<String> displayedImageUrls;
     private ArrayAdapter<String> adapter;
     private GoogleSignInClient mGoogleSignInClient;
 
@@ -62,6 +61,7 @@ public class MainPage extends AppCompatActivity {
         ImageView ticketIcon = findViewById(R.id.ticket);
 
         eventImageUrls = new ArrayList<>();
+        displayedImageUrls = new ArrayList<>();
 
         ListView eventListView = findViewById(R.id.event_list_view);
         EditText searchEditText = findViewById(R.id.search_edit_text);
@@ -81,7 +81,7 @@ public class MainPage extends AppCompatActivity {
                 ImageView eventImageView = view.findViewById(R.id.eventImageView);
 
                 // Pobierz adres URL obrazu dla bieżącej pozycji z listy
-                String imageUrl = eventImageUrls.get(position);
+                String imageUrl = displayedImageUrls.get(position);
 
                 // Użyj Picasso do ładowania obrazu z adresu URL do ImageView
                 Picasso.get().load(imageUrl).placeholder(R.drawable.photo_not_found).into(eventImageView);
@@ -89,7 +89,6 @@ public class MainPage extends AppCompatActivity {
                 return view;
             }
         };
-
 
         eventListView.setAdapter(adapter);
 
@@ -226,12 +225,18 @@ public class MainPage extends AppCompatActivity {
         eventsRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 eventImageUrls.clear();
+                displayedImageUrls.clear();
 
                 for (QueryDocumentSnapshot document : task.getResult()) {
-                    String imageUrl = document.getString("url");
-                    eventImageUrls.add(imageUrl);
+                    int ticketsAvailable = document.getLong("bilety").intValue();
+
+                    if (ticketsAvailable > 0 && isFutureDate(document)) {
+                        String imageUrl = document.getString("url");
+                        eventImageUrls.add(imageUrl);
+                    }
                 }
 
+                displayedImageUrls.addAll(eventImageUrls);
                 adapter.notifyDataSetChanged();
             }
         });
@@ -239,6 +244,7 @@ public class MainPage extends AppCompatActivity {
 
     private void filterAndSortEvents(String searchText, String selectedCategory, String selectedSortOption) {
         displayedEvents.clear();
+        displayedImageUrls.clear();
 
         for (String event : allEvents) {
             String eventName = event.split("\n")[0].replace("Nazwa: ", "").trim();
@@ -247,6 +253,11 @@ public class MainPage extends AppCompatActivity {
 
             if (isCategoryMatch && isNameMatch) {
                 displayedEvents.add(event);
+
+                int index = allEvents.indexOf(event);
+                if (index >= 0 && index < eventImageUrls.size()) {
+                    displayedImageUrls.add(eventImageUrls.get(index));
+                }
             }
         }
 
@@ -257,7 +268,7 @@ public class MainPage extends AppCompatActivity {
         } else if (selectedSortOption.equals("Sortowanie od najdroższych")) {
             sortByPriceDescending();
         } else if (selectedSortOption.equals("Sortowanie: Brak")) {
-            // Do nothing for no sorting option
+            // Nie rób nic, jeśli nie wybrano opcji sortowania
         }
 
         adapter.notifyDataSetChanged();
@@ -302,6 +313,7 @@ public class MainPage extends AppCompatActivity {
             }
         });
 
+        sortImageUrls();
         adapter.notifyDataSetChanged();
     }
 
@@ -316,6 +328,7 @@ public class MainPage extends AppCompatActivity {
             return Double.compare(price1, price2);
         });
 
+        sortImageUrls();
         adapter.notifyDataSetChanged();
     }
 
@@ -330,6 +343,19 @@ public class MainPage extends AppCompatActivity {
             return Double.compare(price2, price1);
         });
 
+        sortImageUrls();
         adapter.notifyDataSetChanged();
+    }
+
+    private void sortImageUrls() {
+        List<String> sortedImageUrls = new ArrayList<>();
+        for (String event : displayedEvents) {
+            int index = allEvents.indexOf(event);
+            if (index >= 0 && index < eventImageUrls.size()) {
+                sortedImageUrls.add(eventImageUrls.get(index));
+            }
+        }
+        displayedImageUrls.clear();
+        displayedImageUrls.addAll(sortedImageUrls);
     }
 }

@@ -1,8 +1,13 @@
 package com.example.eventit;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,13 +29,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class PurchaseHistoryPage extends AppCompatActivity {
 
-    private static final String TAG = "PurchaseHistoryPage";
-
     private FirebaseAuth auth;
     private FirebaseFirestore db;
 
     private ListView eventListView;
-    private ArrayAdapter<String> adapter;
+    private ArrayAdapter<View> adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,7 +43,15 @@ public class PurchaseHistoryPage extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         eventListView = findViewById(R.id.event_list_view);
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+
+        // Use a custom ArrayAdapter to handle custom layout
+        adapter = new ArrayAdapter<View>(this, R.layout.purchase_history_list) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                return getItem(position);
+            }
+        };
+
         eventListView.setAdapter(adapter);
 
         // Retrieve the current user
@@ -63,6 +75,10 @@ public class PurchaseHistoryPage extends AppCompatActivity {
                                     .get()
                                     .continueWith(eventDocument -> {
                                         if (eventDocument.isSuccessful()) {
+                                            // Inflate the purchase history list item view
+                                            View purchaseHistoryItemView = getLayoutInflater().inflate(R.layout.purchase_history_list, null);
+
+                                            // Retrieve event details
                                             String eventName = eventDocument.getResult().getString("nazwa");
                                             String eventLocation = eventDocument.getResult().getString("miasto");
                                             Date eventDate = eventDocument.getResult().getDate("data");
@@ -76,14 +92,26 @@ public class PurchaseHistoryPage extends AppCompatActivity {
                                             double totalPrice = document.getDouble("calkowita_cena");
                                             int quantity = document.getLong("ilosc_zakupionych_biletow").intValue();
 
-                                            String eventDetails = position + ".\n" + "Nazwa: " + eventName +
+                                            // Display event details in the list item view
+                                            TextView eventDetailsTextView = purchaseHistoryItemView.findViewById(R.id.eventDetailsTextView);
+                                            eventDetailsTextView.setText(position + ".\n" + "Nazwa: " + eventName +
                                                     "\nAdres: " + eventAddress + ", " + eventLocation +
                                                     "\nData: " + formattedDate +
                                                     "\nDane klienta: " + userName + ", " + userSurname +
                                                     "\nCalkowita cena: " + totalPrice + " zł" +
-                                                    "\nIlosc zakupionych biletow: " + quantity;
+                                                    "\nIlosc zakupionych biletow: " + quantity);
 
-                                            adapter.add(eventDetails);
+                                            // Load and display event image using Picasso within the list item view
+                                            ImageView eventImageView = purchaseHistoryItemView.findViewById(R.id.eventImageView);
+                                            String imageUrl = eventDocument.getResult().getString("url");
+
+                                            if (imageUrl != null && !imageUrl.isEmpty()) {
+                                                Picasso.get().load(imageUrl).placeholder(R.drawable.photo_not_found).into(eventImageView);
+                                            }
+
+                                            // Add the list item view to the adapter
+                                            adapter.add(purchaseHistoryItemView);
+
                                             position.getAndIncrement();
                                         }
                                         return null;
@@ -94,7 +122,6 @@ public class PurchaseHistoryPage extends AppCompatActivity {
 
                         return Tasks.whenAll(tasks);
                     });
-
         }
     }
 }

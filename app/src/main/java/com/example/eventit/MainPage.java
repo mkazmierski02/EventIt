@@ -4,15 +4,18 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,6 +27,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,7 +36,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 public class MainPage extends AppCompatActivity {
 
@@ -40,10 +43,9 @@ public class MainPage extends AppCompatActivity {
     private FirebaseFirestore db;
     private List<String> allEvents;
     private List<String> displayedEvents;
-
     private List<String> eventIds;
+    private List<String> eventImageUrls;
     private ArrayAdapter<String> adapter;
-
     private GoogleSignInClient mGoogleSignInClient;
 
     @Override
@@ -52,63 +54,66 @@ public class MainPage extends AppCompatActivity {
         setContentView(R.layout.main_page);
 
         db = FirebaseFirestore.getInstance();
-
         mAuth = FirebaseAuth.getInstance();
-
         mGoogleSignInClient = GoogleSignIn.getClient(this, GoogleSignInOptions.DEFAULT_SIGN_IN);
 
         ImageView logoutButton = findViewById(R.id.logout_button);
-
         ImageView accountIcon = findViewById(R.id.account);
-
         ImageView ticketIcon = findViewById(R.id.ticket);
 
+        eventImageUrls = new ArrayList<>();
 
         ListView eventListView = findViewById(R.id.event_list_view);
-
         EditText searchEditText = findViewById(R.id.search_edit_text);
-
         Spinner sortSpinner = findViewById(R.id.sort_spinner);
-
         Spinner categorySpinner = findViewById(R.id.category_spinner);
-
-
-        readEventsFromFirestore();
-
-        logoutButton.setOnClickListener(view -> {
-            mAuth.signOut();
-
-            mGoogleSignInClient.signOut().addOnCompleteListener(this,
-                    task -> {
-                        Intent intent = new Intent(MainPage.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                    });
-        });
-
-        accountIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainPage.this, UserPage.class);
-                startActivity(intent);
-            }
-        });
-        ticketIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainPage.this, PurchaseHistoryPage.class);
-                startActivity(intent);
-            }
-        });
-
 
         allEvents = new ArrayList<>();
         displayedEvents = new ArrayList<>();
 
-        adapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_list_item_1, displayedEvents);
+        adapter = new ArrayAdapter<String>(
+                this, R.layout.event_list_item, R.id.eventTextView, displayedEvents) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+
+                ImageView eventImageView = view.findViewById(R.id.eventImageView);
+
+                // Pobierz adres URL obrazu dla bieżącej pozycji z listy
+                String imageUrl = eventImageUrls.get(position);
+
+                // Użyj Picasso do ładowania obrazu z adresu URL do ImageView
+                Picasso.get().load(imageUrl).placeholder(R.drawable.photo_not_found).into(eventImageView);
+
+                return view;
+            }
+        };
+
+
         eventListView.setAdapter(adapter);
 
+        readEventsFromFirestore();
+        readEventImagesFromFirestore();
+
+        logoutButton.setOnClickListener(view -> {
+            mAuth.signOut();
+            mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
+                Intent intent = new Intent(MainPage.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            });
+        });
+
+        accountIcon.setOnClickListener(v -> {
+            Intent intent = new Intent(MainPage.this, UserPage.class);
+            startActivity(intent);
+        });
+
+        ticketIcon.setOnClickListener(v -> {
+            Intent intent = new Intent(MainPage.this, PurchaseHistoryPage.class);
+            startActivity(intent);
+        });
 
         eventListView.setOnItemClickListener((parent, view, position, id) -> {
             if (position >= 0 && position < displayedEvents.size()) {
@@ -123,9 +128,6 @@ public class MainPage extends AppCompatActivity {
                 }
             }
         });
-
-
-
 
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -218,6 +220,23 @@ public class MainPage extends AppCompatActivity {
         });
     }
 
+    private void readEventImagesFromFirestore() {
+        CollectionReference eventsRef = db.collection("events");
+
+        eventsRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                eventImageUrls.clear();
+
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    String imageUrl = document.getString("url");
+                    eventImageUrls.add(imageUrl);
+                }
+
+                adapter.notifyDataSetChanged();
+            }
+        });
+    }
+
     private void filterAndSortEvents(String searchText, String selectedCategory, String selectedSortOption) {
         displayedEvents.clear();
 
@@ -238,6 +257,7 @@ public class MainPage extends AppCompatActivity {
         } else if (selectedSortOption.equals("Sortowanie od najdroższych")) {
             sortByPriceDescending();
         } else if (selectedSortOption.equals("Sortowanie: Brak")) {
+            // Do nothing for no sorting option
         }
 
         adapter.notifyDataSetChanged();
@@ -264,25 +284,21 @@ public class MainPage extends AppCompatActivity {
     }
 
     private void sortByDate() {
-        Collections.sort(displayedEvents, new Comparator<String>() {
-            @Override
-            public int compare(String event1, String event2) {
+        Collections.sort(displayedEvents, (event1, event2) -> {
+            String date1 = event1.split("\n")[2].replace("Data: ", "").trim();
+            String date2 = event2.split("\n")[2].replace("Data: ", "").trim();
 
-                String date1 = event1.split("\n")[2].replace("Data: ", "").trim();
-                String date2 = event2.split("\n")[2].replace("Data: ", "").trim();
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
 
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+            try {
+                Date dateTime1 = sdf.parse(date1);
+                Date dateTime2 = sdf.parse(date2);
 
-                try {
-                    Date dateTime1 = sdf.parse(date1);
-                    Date dateTime2 = sdf.parse(date2);
-
-                    assert dateTime1 != null;
-                    return dateTime1.compareTo(dateTime2);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return 0;
-                }
+                assert dateTime1 != null;
+                return dateTime1.compareTo(dateTime2);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return 0;
             }
         });
 
@@ -290,37 +306,30 @@ public class MainPage extends AppCompatActivity {
     }
 
     private void sortByPriceAscending() {
-        Collections.sort(displayedEvents, new Comparator<String>() {
-            @Override
-            public int compare(String event1, String event2) {
-                String price1Str = event1.split("\n")[1].replace("Cena: ", "").replace(" zł", "").trim();
-                String price2Str = event2.split("\n")[1].replace("Cena: ", "").replace(" zł", "").trim();
+        Collections.sort(displayedEvents, (event1, event2) -> {
+            String price1Str = event1.split("\n")[1].replace("Cena: ", "").replace(" zł", "").trim();
+            String price2Str = event2.split("\n")[1].replace("Cena: ", "").replace(" zł", "").trim();
 
-                double price1 = Double.parseDouble(price1Str);
-                double price2 = Double.parseDouble(price2Str);
+            double price1 = Double.parseDouble(price1Str);
+            double price2 = Double.parseDouble(price2Str);
 
-                return Double.compare(price1, price2);
-            }
+            return Double.compare(price1, price2);
         });
 
         adapter.notifyDataSetChanged();
     }
 
     private void sortByPriceDescending() {
-        Collections.sort(displayedEvents, new Comparator<String>() {
-            @Override
-            public int compare(String event1, String event2) {
-                String price1Str = event1.split("\n")[1].replace("Cena: ", "").replace(" zł", "").trim();
-                String price2Str = event2.split("\n")[1].replace("Cena: ", "").replace(" zł", "").trim();
+        Collections.sort(displayedEvents, (event1, event2) -> {
+            String price1Str = event1.split("\n")[1].replace("Cena: ", "").replace(" zł", "").trim();
+            String price2Str = event2.split("\n")[1].replace("Cena: ", "").replace(" zł", "").trim();
 
-                double price1 = Double.parseDouble(price1Str);
-                double price2 = Double.parseDouble(price2Str);
+            double price1 = Double.parseDouble(price1Str);
+            double price2 = Double.parseDouble(price2Str);
 
-                return Double.compare(price2, price1);
-            }
+            return Double.compare(price2, price1);
         });
 
         adapter.notifyDataSetChanged();
     }
-
 }

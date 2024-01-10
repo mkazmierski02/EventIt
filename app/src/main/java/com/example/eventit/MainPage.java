@@ -77,13 +77,8 @@ public class MainPage extends AppCompatActivity {
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
-
                 ImageView eventImageView = view.findViewById(R.id.eventImageView);
-
-                // Pobierz adres URL obrazu dla bieżącej pozycji z listy
                 String imageUrl = displayedImageUrls.get(position);
-
-                // Użyj Picasso do ładowania obrazu z adresu URL do ImageView
                 Picasso.get().load(imageUrl).placeholder(R.drawable.photo_not_found).into(eventImageView);
 
                 return view;
@@ -268,7 +263,6 @@ public class MainPage extends AppCompatActivity {
         } else if (selectedSortOption.equals("Sortowanie od najdroższych")) {
             sortByPriceDescending();
         } else if (selectedSortOption.equals("Sortowanie: Brak")) {
-            // Nie rób nic, jeśli nie wybrano opcji sortowania
         }
 
         adapter.notifyDataSetChanged();

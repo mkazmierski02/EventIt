@@ -43,8 +43,6 @@ public class PurchaseHistoryPage extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         eventListView = findViewById(R.id.event_list_view);
-
-        // Use a custom ArrayAdapter to handle custom layout
         adapter = new ArrayAdapter<View>(this, R.layout.purchase_history_list) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -53,8 +51,6 @@ public class PurchaseHistoryPage extends AppCompatActivity {
         };
 
         eventListView.setAdapter(adapter);
-
-        // Retrieve the current user
         FirebaseUser currentUser = auth.getCurrentUser();
 
         if (currentUser != null) {
@@ -66,8 +62,6 @@ public class PurchaseHistoryPage extends AppCompatActivity {
                     .continueWithTask(task -> {
                         List<Task<Void>> tasks = new ArrayList<>();
 
-                        AtomicInteger position = new AtomicInteger(1);
-
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String eventId = document.getString("id_wydarzenia");
 
@@ -75,10 +69,8 @@ public class PurchaseHistoryPage extends AppCompatActivity {
                                     .get()
                                     .continueWith(eventDocument -> {
                                         if (eventDocument.isSuccessful()) {
-                                            // Inflate the purchase history list item view
                                             View purchaseHistoryItemView = getLayoutInflater().inflate(R.layout.purchase_history_list, null);
 
-                                            // Retrieve event details
                                             String eventName = eventDocument.getResult().getString("nazwa");
                                             String eventLocation = eventDocument.getResult().getString("miasto");
                                             Date eventDate = eventDocument.getResult().getDate("data");
@@ -92,27 +84,22 @@ public class PurchaseHistoryPage extends AppCompatActivity {
                                             double totalPrice = document.getDouble("calkowita_cena");
                                             int quantity = document.getLong("ilosc_zakupionych_biletow").intValue();
 
-                                            // Display event details in the list item view
                                             TextView eventDetailsTextView = purchaseHistoryItemView.findViewById(R.id.eventDetailsTextView);
-                                            eventDetailsTextView.setText(position + ".\n" + "Nazwa: " + eventName +
+                                            eventDetailsTextView.setText("Nazwa: " + eventName +
                                                     "\nAdres: " + eventAddress + ", " + eventLocation +
                                                     "\nData: " + formattedDate +
                                                     "\nDane klienta: " + userName + ", " + userSurname +
                                                     "\nCalkowita cena: " + totalPrice + " zł" +
                                                     "\nIlosc zakupionych biletow: " + quantity);
 
-                                            // Load and display event image using Picasso within the list item view
                                             ImageView eventImageView = purchaseHistoryItemView.findViewById(R.id.eventImageView);
                                             String imageUrl = eventDocument.getResult().getString("url");
 
                                             if (imageUrl != null && !imageUrl.isEmpty()) {
                                                 Picasso.get().load(imageUrl).placeholder(R.drawable.photo_not_found).into(eventImageView);
                                             }
-
-                                            // Add the list item view to the adapter
                                             adapter.add(purchaseHistoryItemView);
 
-                                            position.getAndIncrement();
                                         }
                                         return null;
                                     });

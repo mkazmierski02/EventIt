@@ -17,10 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class EventsPage extends AppCompatActivity {
-
     private FirebaseFirestore db;
-    private int availableTickets;
-
     private TextView eventNameTextView;
     private TextView eventDetailsTextView;
     private TextView eventTicketsTextView;
@@ -53,11 +50,10 @@ public class EventsPage extends AppCompatActivity {
                         String eventName = document.getString("nazwa");
                         String eventDescription = document.getString("opis");
                         Double eventPrice = document.getDouble("cena");
-                        availableTickets = document.getLong("bilety").intValue();
                         Date eventDate = document.getDate("data");
                         String city = document.getString("miasto");
                         String street = document.getString("adres");
-                        String imageUrl = document.getString("url"); // Pobierz URL zdjęcia
+                        String imageUrl = document.getString("url");
 
                         eventNameTextView.setText(eventName);
                         eventDetailsTextView.setText(eventDescription);
@@ -67,7 +63,6 @@ public class EventsPage extends AppCompatActivity {
                         String formattedDate = dateFormat.format(eventDate);
                         eventDateTextView.setText(formattedDate +  ", " + street + ", " + city);
 
-                        // Załaduj zdjęcie przy użyciu Glide
                         Glide.with(this)
                                 .load(imageUrl)
                                 .into(eventImageView);

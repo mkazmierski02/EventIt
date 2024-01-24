@@ -141,7 +141,8 @@ public class PurchasePage extends AppCompatActivity {
         purchaseData.put("nazwisko", lastName);
         purchaseData.put("id_wydarzenia", eventId);
         purchaseData.put("ilosc_zakupionych_biletow", quantity);
-        purchaseData.put("calkowita_cena", total);
+        String formattedTotal = String.format("%.2f", total);
+        purchaseData.put("calkowita_cena", Double.parseDouble(formattedTotal));
 
         db.collection("purchase history")
                 .add(purchaseData);

@@ -1,6 +1,5 @@
 package com.example.eventit;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,7 +63,7 @@ public class PurchaseHistoryPage extends AppCompatActivity {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String eventId = document.getString("id_wydarzenia");
 
-                            @SuppressLint("SetTextI18n") Task<Void> eventTask = db.collection("events").document(eventId)
+                            Task<Void> eventTask = db.collection("events").document(eventId)
                                     .get()
                                     .continueWith(eventDocument -> {
                                         if (eventDocument.isSuccessful()) {
@@ -87,7 +86,7 @@ public class PurchaseHistoryPage extends AppCompatActivity {
                                             eventDetailsTextView.setText("Nazwa: " + eventName +
                                                     "\nAdres: " + eventAddress + ", " + eventLocation +
                                                     "\nData: " + formattedDate +
-                                                    "\nDane klienta: " + userName + ", " + userSurname +
+                                                    "\nDane klienta: " + userName + " " + userSurname +
                                                     "\nCalkowita cena: " + totalPrice + " zł" +
                                                     "\nIlosc zakupionych biletow: " + quantity);
 

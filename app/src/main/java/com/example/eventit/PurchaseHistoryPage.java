@@ -1,5 +1,6 @@
 package com.example.eventit;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +13,6 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,7 +25,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class PurchaseHistoryPage extends AppCompatActivity {
 
@@ -65,7 +64,7 @@ public class PurchaseHistoryPage extends AppCompatActivity {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String eventId = document.getString("id_wydarzenia");
 
-                            Task<Void> eventTask = db.collection("events").document(eventId)
+                            @SuppressLint("SetTextI18n") Task<Void> eventTask = db.collection("events").document(eventId)
                                     .get()
                                     .continueWith(eventDocument -> {
                                         if (eventDocument.isSuccessful()) {
